@@ -23,6 +23,8 @@ git clone https://github.com/wanoz/panml.git
 ```
 
 ## Usage
+Check out the [Quick start guide](https://github.com/Pan-ML/panml/wiki/1.-Quick-start-guide) or other examples in [Wiki](https://github.com/Pan-ML/panml/wiki)
+
 ### Importing the module
 ```python
 # Import panml
@@ -31,20 +33,13 @@ from panml.models import ModelPack
 # Import other modules/packages as required
 import numpy as np
 import pandas as pd
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 ...
 ```
 
 ### Using open source models from HuggingFace Hub
-Create model pack to load model from HuggingFace Hub
 ```python
 lm = ModelPack(model='gpt2', source='huggingface')
-```
 
-Generate output
-```python
 output = lm.predict('hello world is')
 print(output['text'])
 ```
@@ -53,21 +48,7 @@ print(output['text'])
 'hello world is a place where people can live and work together, and where people can live and work together, and where people can live and work together'
 ```
 
-Show probability of output token
-```python
-output = lm.predict('hello world is', display_probability=True)
-print(output['probability'][:5]) # show probability of first 5 tokens in the generated output that follows the provided context
-```
-```
-# Output
-[{'token': ' a', 'probability': 0.052747420966625214},
- {'token': ' place', 'probability': 0.045980263501405716},
- {'token': ' where', 'probability': 0.4814596474170685},
- {'token': ' people', 'probability': 0.27657589316368103},
- {'token': ' can', 'probability': 0.2809840738773346}]
-```
- 
-Fine tune the model with your own data from Pandas dataframe - execute in self-supervised autoregressive training regime.
+### Fine tune custom LLM
 ```python
 # Specify train args
 train_args = {
@@ -93,50 +74,11 @@ y = x
 lm.fit(x, y, train_args, instruct=False)
 ```
 
-Generate output with the fine tuned model
-```python
-output = lm.predict('hello world is', display_probability=True)
-print(output['text'])
-```
-
-Load the locally fine tuned model for use
-```python
-new_lm = ModelPack(model='./results/model_my_tuned_gpt2/', source='local')
-```
-
-### Using models from OpenAI
+### Prompt chain engineering
 Create model pack from OpenAI model description and API key
 ```python
 lm = ModelPack(model='text-davinci-002', source='openai', api_key=<your_openai_key>)
-```
 
-Generate output
-```python
-output = lm.predict('What is the best way to live a healthy lifestyle?')
-output['text']
-```
-```
-# Output
-\nThe best way to live a healthy lifestyle is to eat healthy foods, get regular exercise, 
-and get enough sleep.
-```
-
-Show probability of output token
-```python
-output = lm.predict('What is the best way to live a healthy lifestyle?', display_probability=True)
-print(output['probability'][:5]) # show probability of first 5 tokens in the generated output that follows the provided context
-```
-```
-# Output
-[{'token': '\n', 'probability': 0.9912449516093955},
- {'token': 'The', 'probability': 0.40432789860673046},
- {'token': ' best', 'probability': 0.9558591494467851},
- {'token': ' way', 'probability': 0.9988543268851316},
- {'token': ' to', 'probability': 0.9993104225678759}]
-```
-
-Generate output using multi-stage prompting (via a prompt modifier) <br>
-```python
 prompts = [
     {'prepend': 'you are a sports coach'},
     {'prepend': 'produce a daily exercise plan for one week'},
@@ -146,8 +88,6 @@ prompts = [
 output = lm.predict('What is the best way to live a healthy lifestyle?', prompt_modifier=prompts, max_tokens=600)
 output['text']
 ```
-###### *Note: Prompt modifier is a list where each item specifies text to be prepended (attached before) and/or appended (attched after) the query/prompt. For example, the texts in first item of list will be prepended/appended to the initial query/prompt, and the texts of the second item in the list will be prepended/appended to the returned LLM response, and the resulting follow-up query/prompt will then be automatically issued to the LLM. This repeats recursively through all of the prompts in the prompt modifier list*
-
 ```
 # Output
 '\nAssuming you are starting from a sedentary lifestyle, a good goal to aim for is 
@@ -164,21 +104,7 @@ Finally, be sure to get enough sleep each night. Most adults need 7-8 hours of s
 Getting enough sleep will help your body to recover from your workouts and will also help to reduce stress levels.'
 ```
 
-Generate embedding
-```python
-output = lm.embedding('What is the best way to live a healthy lifestyle?')
-print(output[:5]) # show first 5 embedding elements
-```
-```
-# Output
-[0.025805970653891563,
- 0.007422071415930986,
- 0.01738160289824009,
- -0.006787706166505814,
- -0.003324073040857911]
-```
-
-Autogenerate and execute code
+### Prompted code generation
 ```python
 code = lm.predict_code('calculate the fibonacci sequence using input', x=19, 
                        variable_names={'output': 'ans'}, language='python')
