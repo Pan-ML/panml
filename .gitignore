@@ -1,0 +1,29 @@
+# Environments
+.env
+.envrc
+.venv
+.venvs
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+notebooks/
+
+# MacOS display setting files
+.DS_Store
+
+# Wandb directory
+wandb/
+
+# VS code
+.vs/
+.vscode/
+.idea/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
