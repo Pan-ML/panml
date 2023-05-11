@@ -18,13 +18,13 @@ This package aims to make analysis and experimentation of generative AI/ML model
 <br>
 
 ## Installation
-```
+```bash
 git clone https://github.com/wanoz/panml.git
 ```
 
 ## Usage
 ### Importing the module
-```
+```python
 # Import panml
 from panml.models import ModelPack
 
@@ -39,7 +39,7 @@ import torch.nn.functional as F
 
 ### Using open source models from HuggingFace Hub
 Create model pack to load model from HuggingFace Hub
-```
+```python
 lm = ModelPack(model='gpt2', source='huggingface')
 ```
 
@@ -54,7 +54,7 @@ print(output['text'])
 ```
 
 Show probability of output token
-```
+```python
 output = lm.predict('hello world is', display_probability=True)
 print(output['probability'][:5]) # show probability of first 5 tokens in the generated output that follows the provided context
 ```
@@ -68,7 +68,7 @@ print(output['probability'][:5]) # show probability of first 5 tokens in the gen
 ```
  
 Fine tune the model with your own data from Pandas dataframe - execute in self-supervised autoregressive training regime.
-```
+```python
 # Specify train args
 train_args = {
     'title': 'my_tuned_gpt2',
@@ -94,24 +94,24 @@ lm.fit(x, y, train_args, instruct=False)
 ```
 
 Generate output with the fine tuned model
-```
+```python
 output = lm.predict('hello world is', display_probability=True)
 print(output['text'])
 ```
 
 Load the locally fine tuned model for use
-```
+```python
 new_lm = ModelPack(model='./results/model_my_tuned_gpt2/', source='local')
 ```
 
 ### Using models from OpenAI
 Create model pack from OpenAI model description and API key
-```
+```python
 lm = ModelPack(model='text-davinci-002', source='openai', api_key=<your_openai_key>)
 ```
 
 Generate output
-```
+```python
 output = lm.predict('What is the best way to live a healthy lifestyle?')
 output['text']
 ```
@@ -122,7 +122,7 @@ and get enough sleep.
 ```
 
 Show probability of output token
-```
+```python
 output = lm.predict('What is the best way to live a healthy lifestyle?', display_probability=True)
 print(output['probability'][:5]) # show probability of first 5 tokens in the generated output that follows the provided context
 ```
@@ -136,7 +136,7 @@ print(output['probability'][:5]) # show probability of first 5 tokens in the gen
 ```
 
 Generate output using multi-stage prompting (via a prompt modifier) <br>
-```
+```python
 prompts = [
     {'prepend': 'you are a sports coach'},
     {'prepend': 'produce a daily exercise plan for one week'},
@@ -165,7 +165,7 @@ Getting enough sleep will help your body to recover from your workouts and will 
 ```
 
 Generate embedding
-```
+```python
 output = lm.embedding('What is the best way to live a healthy lifestyle?')
 print(output[:5]) # show first 5 embedding elements
 ```
@@ -179,7 +179,7 @@ print(output[:5]) # show first 5 embedding elements
 ```
 
 Autogenerate and execute code
-```
+```python
 code = lm.predict_code('calculate the fibonacci sequence using input', x=19, 
                        variable_names={'output': 'ans'}, language='python')
 print(code)
