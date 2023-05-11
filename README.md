@@ -1,6 +1,6 @@
 ## PanML: A simple generative AI/ML development toolkit
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
 [![](https://dcbadge.vercel.app/api/server/QpquRMDq?compact=true&style=flat)](https://discord.gg/QpquRMDq)
 
 ## Goal
