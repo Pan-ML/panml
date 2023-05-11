@@ -44,7 +44,7 @@ lm = ModelPack(model='gpt2', source='huggingface')
 ```
 
 Generate output
-```
+```python
 output = lm.predict('hello world is')
 print(output['text'])
 ```
