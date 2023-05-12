@@ -89,7 +89,7 @@ class HuggingFaceModelPack:
                  'probability': torch.max(torch.exp(s)).item()} for s in output['scores']
             ]
             # Calculate perplexity of output
-            output_context['perplexity'] = (1/(torch.prod(torch.tensor([torch.max(torch.exp(s)).item() for s in output['scores']])).item()))**(1/len(output['scores']))
+            output_context['perplexity'] = (1/(torch.prod(torch.Tensor([torch.max(torch.exp(s)).item() for s in output['scores']])).item()))**(1/len(output['scores']))
         else:
             output_context['text'] = self.tokenizer.decode(output[0], skip_special_tokens=skip_special_tokens)
         output_context['text'] = output_context['text'].replace('\n', '')
