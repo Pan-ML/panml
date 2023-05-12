@@ -65,6 +65,7 @@ class HuggingFaceModelPack:
         output_context = {
             'text': None,
             'probability': None,
+            'perplexity': None,
         }
         
         input_ids = self.tokenizer.encode(text, return_tensors='pt')
@@ -87,6 +88,8 @@ class HuggingFaceModelPack:
                 {'token': self.tokenizer.decode(torch.argmax(torch.exp(s)).item()), 
                  'probability': torch.max(torch.exp(s)).item()} for s in output['scores']
             ]
+            # Calculate perplexity of output
+            output_context['perplexity'] = (1/(torch.prod(torch.Tensor([torch.max(torch.exp(s)).item() for s in output['scores']])).item()))**(1/len(output['scores']))
         else:
             output_context['text'] = self.tokenizer.decode(output[0], skip_special_tokens=skip_special_tokens)
         output_context['text'] = output_context['text'].replace('\n', '')
@@ -193,6 +196,7 @@ class OpenAIModelPack:
         output_context = {
             'text': None,
             'probability': None,
+            'perplexity': None,
         }
         response = openai.Completion.create(
             model=model,
@@ -213,6 +217,9 @@ class OpenAIModelPack:
             tokens = response["choices"][0]['logprobs']['tokens']
             token_logprobs = response["choices"][0]['logprobs']['token_logprobs']
             output_context['probability'] = [{'token': token, 'probability': torch.exp(torch.Tensor([logprob])).item()} for token, logprob in zip(tokens, token_logprobs)]
+
+            # Calculate perplexity of output
+            output_context['perplexity'] = (1/torch.prod(torch.tensor([torch.exp(torch.Tensor([logprob])).item() for logprob in token_logprobs])).item())**(1/len(tokens))
 
         return output_context
     
