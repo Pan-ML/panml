@@ -129,3 +129,29 @@ ans = Fibonacci(x)
 
 Answer: 2584
 ```
+
+# Contributing
+
+## Pre-requisites
+- python 3.9x
+
+## Setting up
+
+```bash
+git clone https://github.com/wanoz/panml.git
+
+# create virtual environment
+python3 -m venv . 
+
+# activate virtual env - https://docs.python.org/3/library/venv.html#how-venvs-work
+source bin/activate # if unix
+Scripts/activate.bat # if windows cmd
+
+# Install requirements
+pip install -r requirements.txt
+```
+
+## Running tests
+```
+python3 -m unittest
+```

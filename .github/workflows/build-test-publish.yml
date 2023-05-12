@@ -1,0 +1,21 @@
+name: Build Test Publish
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Use Python3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9.10'
+          cache: 'pip' # cache pip dependencies
+      - name: Install requirements
+        run: pip install -r requirements.txt
+        shell: bash
+      - name: Run tests
+        run: python3 -m unittest
