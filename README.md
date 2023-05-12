@@ -15,6 +15,9 @@ This package aims to make analysis and experimentation of generative AI/ML model
 <br><br>
 **Current supported evals** <br>
 *Coming later...*
+
+More content will be coming!
+
 <br>
 
 ## Installation
