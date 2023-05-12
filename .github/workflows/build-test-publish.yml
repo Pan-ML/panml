@@ -12,8 +12,7 @@ jobs:
       - name: Use Python3
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9.10'
-          cache: 'pip' # cache pip dependencies
+          python-version: '3.9'
       - name: Install requirements
         run: pip install -r requirements.txt
         shell: bash
