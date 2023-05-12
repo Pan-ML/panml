@@ -48,5 +48,10 @@ class TestModelPack(unittest.TestCase):
         # test no openai api key provided
         with self.assertRaises(ValueError):
             m = ModelPack(model='text-davinci-002', source='openai')
+    
+    # Test case 6: handle model and source correct match input
+    def test_correct_model_source_input(self):
+        # test valid model and source match combo 2
+        m = ModelPack(model='google/flan-t5-small', source='huggingface')
 
 
