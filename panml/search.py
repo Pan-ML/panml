@@ -44,8 +44,8 @@ class FAISSVectorEngine:
             pass
         
     # Perform vector search of query against stored vectors and retrieve top k results
-    def search(self, sample: str, k: int) -> list[str]:
-        D, I = self.stored_vectors.search(self.model_hf.encode([sample]), k) # embed input vector then perform vector search
+    def search(self, query: str, k: int) -> list[str]:
+        D, I = self.stored_vectors.search(self.model_hf.encode([query]), k) # embed input vector then perform vector search
         return list(np.array(self.corpus)[I][0])
 
 # Entry vector engine class           
