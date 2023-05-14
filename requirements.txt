@@ -39,3 +39,6 @@ tzdata==2023.3
 urllib3==2.0.2
 xxhash==3.2.0
 yarl==1.9.2
+faiss-cpu==1.7.4
+faiss-gpu==1.7.2
+sentence-transformers==2.2.2
