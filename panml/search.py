@@ -79,10 +79,6 @@ class VectorEngine:
     # Direct to the attribute of the sub vector engine class (attribute not found in the main vector engine class)
     def __getattr__(self, name):
         return self.instance.__getattribute__(name)
-    
-# Set device type
-def set_device() -> str:
-    return 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Calculate cosine similarity of two matrices    
 def cosine_similarity(t1: torch.Tensor, t2: torch.Tensor) -> torch.Tensor:

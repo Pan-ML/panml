@@ -368,5 +368,6 @@ class ModelPack:
     def __getattr__(self, name):
         return self.instance.__getattribute__(name)
     
-    
-
+# Set device type
+def set_device() -> str:
+    return 'cuda' if torch.cuda.is_available() else 'cpu'
