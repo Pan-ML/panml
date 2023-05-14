@@ -6,7 +6,7 @@ class TestVectorEngine(unittest.TestCase):
     Run tests on VecterEngine class in models.py
     '''
     # Test case 1: handle invalid source input
-    def test_faiss_invalid_source_input(self):
+    def test_faiss_hf_invalid_source_input(self):
         # test invalid source as int
         with self.assertRaises(ValueError):
             m = VectorEngine(model=None, source=1)
@@ -18,7 +18,7 @@ class TestVectorEngine(unittest.TestCase):
             m = VectorEngine(model=None, source='faiss1')
 
     # Test case 2: handle invalid model input
-    def test_faiss_invalid_source_input(self):
+    def test_faiss_hf_invalid_source_input(self):
         # test invalid model as int
         with self.assertRaises(ValueError):
             m = VectorEngine(model=1, source='faiss')
@@ -30,7 +30,7 @@ class TestVectorEngine(unittest.TestCase):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens1', source='faiss')
 
     # Test case 3: validate FAISS vector search functionality
-    def test_faiss_vector_search(self):
+    def test_faiss_hf_vector_search(self):
         # test sample input
         TEST_CORPUS = [
             'The quick brown fox jumps over the lazy dog', 
