@@ -1,11 +1,11 @@
 import unittest
-from panml.models import VectorEngine
+from panml.utils import VectorEngine
 
 class TestVectorEngine(unittest.TestCase):
     '''
     Run tests on VecterEngine class in models.py
     '''
-    # Test case 1: handle invalid source input
+    # Test case: handle invalid source input
     def test_faiss_hf_invalid_source_input(self):
         # test invalid source as int
         with self.assertRaises(ValueError):
@@ -17,8 +17,8 @@ class TestVectorEngine(unittest.TestCase):
         with self.assertRaises(ValueError):
             m = VectorEngine(model=None, source='faiss1')
 
-    # Test case 2: handle invalid model input
-    def test_faiss_hf_invalid_source_input(self):
+    # Test case: handle invalid model input
+    def test_faiss_hf_invalid_model_input(self):
         # test invalid model as int
         with self.assertRaises(ValueError):
             m = VectorEngine(model=1, source='faiss')
@@ -29,7 +29,7 @@ class TestVectorEngine(unittest.TestCase):
         with self.assertRaises(ValueError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens1', source='faiss')
 
-    # Test case 3: validate FAISS vector search functionality
+    # Test case: validate FAISS vector search functionality
     def test_faiss_hf_vector_search(self):
         # test sample input
         TEST_CORPUS = [
