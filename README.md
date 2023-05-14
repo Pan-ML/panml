@@ -19,7 +19,7 @@ This package aims to make analysis and experimentation of generative AI/ML model
 
 ## Installation
 ```bash
-git clone https://github.com/wanoz/panml.git
+git clone https://github.com/Pan-ML/panml.git
 ```
 
 ## Usage
@@ -138,7 +138,7 @@ Answer: 2584
 ## Setting up
 
 ```bash
-git clone https://github.com/wanoz/panml.git
+git clone https://github.com/Pan-ML/panml.git
 
 # create virtual environment
 python3 -m venv . 
