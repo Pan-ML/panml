@@ -6,7 +6,7 @@ class TestVectorEngine(unittest.TestCase):
     Run tests on VecterEngine class in models.py
     '''
     # Test case 1: handle invalid source input
-    def test_invalid_source_input(self):
+    def test_faiss_invalid_source_input(self):
         # test invalid source as int
         with self.assertRaises(ValueError):
             m = VectorEngine(model=None, source=1)
@@ -18,7 +18,7 @@ class TestVectorEngine(unittest.TestCase):
             m = VectorEngine(model=None, source='faiss1')
 
     # Test case 2: handle invalid model input
-    def test_invalid_source_input(self):
+    def test_faiss_invalid_source_input(self):
         # test invalid model as int
         with self.assertRaises(ValueError):
             m = VectorEngine(model=1, source='faiss')
@@ -44,16 +44,20 @@ class TestVectorEngine(unittest.TestCase):
             'The slow brown dog is lazy', 
             'The slow white rabbit is lazy',
         ]
-        TEST_SAMPLES = [{
-            'text': 'white rabbit',
-            'k': 3,
-            'expected_output': [
-                'The slow white rabbit is lazy',
-                'The quick brown rabbit jumps over the lazy dog',
-                'The quick brown rabbit jumps over the lazy cat'
-            ],
-        }]
+        TEST_SAMPLES = [
+            {
+                'text': 'white rabbit',
+                'k': 3,
+                'expected_output': [
+                    'The slow white rabbit is lazy',
+                    'The quick brown rabbit jumps over the lazy dog',
+                    'The quick brown rabbit jumps over the lazy cat'
+                ],
+            },
+        ]
+        # Run vector search validation
         m = VectorEngine(source='faiss')
         m.store(TEST_CORPUS)
-        output = m.search(TEST_SAMPLES[0]['text'], TEST_SAMPLES[0]['k']) # get test output
-        self.assertEqual(output, TEST_SAMPLES[0]['expected_output']) # check test output against expected output
+        for sample in TEST_SAMPLES:
+            output = m.search(sample['text'], sample['k']) # get test output
+            self.assertEqual(output, sample['expected_output'], 'FAISS vector search output is not as expected, review may be required.') # check test output against expected output
