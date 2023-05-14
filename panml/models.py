@@ -405,7 +405,7 @@ class FAISSVectorEngine:
         self.stored_vectors.add(vectors) # store vectors for search
         
         # Optimised FAISS vector search via index partitioning
-        if mode_args['model'] == 'boost':
+        if mode_args['mode'] == 'boost':
             print('Boost (optimised) FAISS vector search not yet implemented')
             # TODO add index partitioning for FAISS search optimisation
             pass
