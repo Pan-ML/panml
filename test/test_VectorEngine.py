@@ -29,3 +29,31 @@ class TestVectorEngine(unittest.TestCase):
         with self.assertRaises(ValueError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens1', source='faiss')
 
+    # Test case 3: validate FAISS vector search functionality
+    def test_faiss_vector_search(self):
+        # test sample input
+        TEST_CORPUS = [
+            'The quick brown fox jumps over the lazy dog', 
+            'The quick brown rabbit jumps over the lazy dog', 
+            'The quick brown rabbit jumps over the lazy cat', 
+            'The quick brown cat jumps over the lazy dog', 
+            'The quick brown cat jumps over the lazy rabbit', 
+            'The quick brown cat jumps over the lazy fox', 
+            'The quick brown cat is lazy', 
+            'The quick brown fox is lazy', 
+            'The slow brown dog is lazy', 
+            'The slow white rabbit is lazy',
+        ]
+        TEST_SAMPLES = [{
+            'text': 'white rabbit',
+            'k': 3,
+            'expected_output': [
+                'The slow white rabbit is lazy',
+                'The quick brown rabbit jumps over the lazy dog',
+                'The quick brown rabbit jumps over the lazy cat'
+            ],
+        }]
+        m = VectorEngine(source='faiss')
+        m.store(TEST_CORPUS)
+        output = m.search(TEST_SAMPLES[0]['text'], TEST_SAMPLES[0]['k']) # get test output
+        self.assertEqual(output, TEST_SAMPLES[0]['expected_output']) # check test output against expected output
