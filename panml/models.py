@@ -344,9 +344,11 @@ class ModelPack:
             'openai',
         ]
         
-        # HuggingFace Hub model call
+        # General exceptions handling on user input
         if self.source not in self.supported_sources:
             raise ValueError('The specified source is not recognized. Supported sources are: ' + ' '.join([f"{s}" for s in self.supported_sources]))
+
+        # HuggingFace Hub model call
         if self.source == 'huggingface':
             if self.model not in self.supported_models['huggingface']:
                 raise ValueError('The specified model is currently not supported in this package. Supported HuggingFace Hub models are: ' + ' '.join([f"{m}" for m in self.supported_models['huggingface']]))

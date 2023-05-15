@@ -31,6 +31,112 @@ class TestVectorEngine(unittest.TestCase):
         with self.assertRaises(ValueError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens1', source='faiss')
 
+    # Test case: handle invalid corpus input
+    print('Setup test_faiss_hf_invalid_corpus_input_storage')
+    def test_faiss_hf_invalid_corpus_input_storage(self):
+        # test invalid corpus store input type
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_CORPUS = 1
+            m.store(TEST_CORPUS)
+
+        # test invalid corpus store input type
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_CORPUS = 0.2
+            m.store(TEST_CORPUS)
+
+        # test invalid corpus store input type
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_CORPUS = None
+            m.store(TEST_CORPUS)
+
+        # test invalid corpus store input type
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_CORPUS = []
+            m.store(TEST_CORPUS)
+
+    # Test case: handle invalid model input
+    print('Setup test_faiss_hf_invalid_corpus_input_query')
+    def test_faiss_hf_invalid_corpus_input_query(self):
+        # test invalid corpus query input type
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_CORPUS = [
+                'The quick brown fox jumps over the lazy dog', 
+                'The quick brown rabbit jumps over the lazy dog', 
+                'The quick brown rabbit jumps over the lazy cat', 
+                'The quick brown cat jumps over the lazy dog', 
+                'The quick brown cat jumps over the lazy rabbit', 
+                'The quick brown cat jumps over the lazy fox', 
+                'The quick brown cat is lazy', 
+                'The quick brown fox is lazy', 
+                'The slow brown dog is lazy', 
+                'The slow white rabbit is lazy',
+            ]
+            TEST_SAMPLE = 1
+            m.store(TEST_CORPUS)
+            output = m.search(TEST_SAMPLE, 3)
+
+        # test invalid corpus query input type
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_CORPUS = [
+                'The quick brown fox jumps over the lazy dog', 
+                'The quick brown rabbit jumps over the lazy dog', 
+                'The quick brown rabbit jumps over the lazy cat', 
+                'The quick brown cat jumps over the lazy dog', 
+                'The quick brown cat jumps over the lazy rabbit', 
+                'The quick brown cat jumps over the lazy fox', 
+                'The quick brown cat is lazy', 
+                'The quick brown fox is lazy', 
+                'The slow brown dog is lazy', 
+                'The slow white rabbit is lazy',
+            ]
+            TEST_SAMPLE = 0.2
+            m.store(TEST_CORPUS)
+            output = m.search(TEST_SAMPLE, 3)
+
+        # test invalid corpus query input type
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_CORPUS = [
+                'The quick brown fox jumps over the lazy dog', 
+                'The quick brown rabbit jumps over the lazy dog', 
+                'The quick brown rabbit jumps over the lazy cat', 
+                'The quick brown cat jumps over the lazy dog', 
+                'The quick brown cat jumps over the lazy rabbit', 
+                'The quick brown cat jumps over the lazy fox', 
+                'The quick brown cat is lazy', 
+                'The quick brown fox is lazy', 
+                'The slow brown dog is lazy', 
+                'The slow white rabbit is lazy',
+            ]
+            TEST_SAMPLE = None
+            m.store(TEST_CORPUS)
+            output = m.search(TEST_SAMPLE, 3)
+
+        # test invalid corpus query input type
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_CORPUS = [
+                'The quick brown fox jumps over the lazy dog', 
+                'The quick brown rabbit jumps over the lazy dog', 
+                'The quick brown rabbit jumps over the lazy cat', 
+                'The quick brown cat jumps over the lazy dog', 
+                'The quick brown cat jumps over the lazy rabbit', 
+                'The quick brown cat jumps over the lazy fox', 
+                'The quick brown cat is lazy', 
+                'The quick brown fox is lazy', 
+                'The slow brown dog is lazy', 
+                'The slow white rabbit is lazy',
+            ]
+            TEST_SAMPLE = []
+            m.store(TEST_CORPUS)
+            output = m.search(TEST_SAMPLE, 3)
+
     # Test case: validate FAISS vector search functionality
     print('Setup test_faiss_hf_vector_search')
     def test_faiss_hf_vector_search(self):
@@ -64,3 +170,10 @@ class TestVectorEngine(unittest.TestCase):
         for sample in TEST_SAMPLES:
             output = m.search(sample['text'], sample['k']) # get test output
             self.assertEqual(output, sample['expected_output'], 'FAISS vector search output is not as expected, review may be required.') # check test output against expected output
+
+    # Test case: validate FAISS vector search functionality
+    print('Setup test_faiss_missing_openai_key')
+    def test_faiss_missing_openai_key(self):
+        # test no openai api key provided
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='text-davinci-002', source='faiss')
