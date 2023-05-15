@@ -46,17 +46,21 @@ class HuggingFaceModelPack:
     def embedding(self, text: str) -> torch.Tensor:
         token_ids = self.tokenizer.encode(text, return_tensors='pt')
         
-        # Get embeddings
-        if 'flan' in self.model_hf.name_or_path: 
-            emb = self.model_hf.shared.weight[token_ids[0]] # embeddings for FLAN
-        else: 
-            emb = self.model_hf.transformer.wte.weight[token_ids[0]] # embeddings for GPT2
+        # # Get embeddings
+        # if 'flan' in self.model_hf.name_or_path: 
+        #     emb = self.model_hf.shared.weight[token_ids[0]] # embeddings for FLAN
+        # else: 
+        #     emb = self.model_hf.transformer.wte.weight[token_ids[0]] # embeddings for GPT2
             
-        emb /= emb.norm(dim=1).unsqueeze(1) # normalise embedding weights
-        emb_pad = torch.zeros(self.padding_length, emb.shape[1]) # Set and apply padding to embeddings
-        emb_pad[:emb.shape[0], :] = emb
-        
-        return emb_pad
+        # emb /= emb.norm(dim=1).unsqueeze(1) # normalise embedding weights
+        # emb_pad = torch.zeros(self.padding_length, emb.shape[1]) # Set and apply padding to embeddings
+        # emb_pad[:emb.shape[0], :] = emb
+
+        model_input_params = {'input_ids': token_ids}
+        if 'flan' in self.model_hf.name_or_path:
+            model_input_params['decoder_input_ids'] = token_ids
+        outputs = self.model_hf(**model_input_params, output_hidden_states=True) 
+        return outputs.hidden_states[-1].mean(dim=1) # values in the last hidden layer averaged across all tokens
     
     # Generate text
     def predict(self, text: str, max_length: int=50, skip_special_tokens: bool=True, 
