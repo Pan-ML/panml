@@ -35,24 +35,24 @@ class TestVectorEngine(unittest.TestCase):
     print('Setup test_faiss_hf_invalid_corpus_input_storage')
     def test_faiss_hf_invalid_corpus_input_storage(self):
         # test invalid corpus store input type
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_CORPUS = 1
             m.store(TEST_CORPUS)
 
         # test invalid corpus store input type
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_CORPUS = 0.2
             m.store(TEST_CORPUS)
 
-        # test invalid corpus store input type
-        with self.assertRaises(ValueError):
+        # test invalid corpus store input type - None
+        with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_CORPUS = None
             m.store(TEST_CORPUS)
 
-        # test invalid corpus store input type
+        # test invalid corpus store input value - empty
         with self.assertRaises(ValueError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_CORPUS = []
@@ -62,7 +62,7 @@ class TestVectorEngine(unittest.TestCase):
     print('Setup test_faiss_hf_invalid_corpus_input_query')
     def test_faiss_hf_invalid_corpus_input_query(self):
         # test invalid corpus query input type
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_CORPUS = [
                 'The quick brown fox jumps over the lazy dog', 
@@ -81,7 +81,7 @@ class TestVectorEngine(unittest.TestCase):
             output = m.search(TEST_SAMPLE, 3)
 
         # test invalid corpus query input type
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_CORPUS = [
                 'The quick brown fox jumps over the lazy dog', 
@@ -99,8 +99,8 @@ class TestVectorEngine(unittest.TestCase):
             m.store(TEST_CORPUS)
             output = m.search(TEST_SAMPLE, 3)
 
-        # test invalid corpus query input type
-        with self.assertRaises(ValueError):
+        # test invalid corpus query input type - None
+        with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_CORPUS = [
                 'The quick brown fox jumps over the lazy dog', 
@@ -119,7 +119,7 @@ class TestVectorEngine(unittest.TestCase):
             output = m.search(TEST_SAMPLE, 3)
 
         # test invalid corpus query input type
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_CORPUS = [
                 'The quick brown fox jumps over the lazy dog', 

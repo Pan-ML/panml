@@ -61,6 +61,13 @@ class HuggingFaceModelPack:
     def predict(self, text: str, max_length: int=50, skip_special_tokens: bool=True, 
                 display_probability: bool=False, num_return_sequences: int=1, temperature: float=0.8, 
                 top_p: float=0.8, top_k: int=0, no_repeat_ngram_size: int=3) -> dict[str, str]:
+        '''
+        Generates output by prompting a language model from HuggingFace Hub
+        '''
+        # Catch input exceptions
+        if not isinstance(text, str):
+            raise TypeError('Input text needs to be of type: string')
+            
         output_context = {
             'text': None,
             'probability': None,
@@ -114,6 +121,17 @@ class HuggingFaceModelPack:
     # Model training
     def fit(self, x: list[str], y: list[str], train_args: dict[str, Union[str, int, float]]={}, 
             instruct: bool=False, num_proc=4) -> None:
+        '''
+        Fine tuning of a language model from HuggingFace Hub
+        '''
+        # Catch input exceptions
+        if not isinstance(x, list):
+            raise TypeError('Input data array, x, needs to be of type: list')
+        if not isinstance(y, list):
+            raise TypeError('Input data array, y, needs to be of type: list')
+        if not isinstance(train_args, dict):
+            raise TypeError('Input train args needs to be of type: dict')
+            
         # Convert to tokens format from pandas dataframes
         tokenized_data = self.tokenize_text(x, batched=self.tokenizer_batch, num_proc=num_proc)
         tokenized_target = self.tokenize_text(y, batched=self.tokenizer_batch, num_proc=num_proc)
@@ -191,28 +209,57 @@ class OpenAIModelPack:
     # Generate text of single model call
     @staticmethod
     def _predict(model: str, text: str, temperature: float, max_tokens: int, top_p: float, n: int, 
-                 frequency_penalty: float, presence_penalty: float, display_probability: bool, logprobs: int) -> dict[str, str]:
+                 frequency_penalty: float, presence_penalty: float, display_probability: bool, logprobs: int, 
+                 chat_role: str) -> dict[str, str]:
+        '''
+        Base function for text generation using OpenAI models
+        '''
         output_context = {
             'text': None,
             'probability': None,
             'perplexity': None,
         }
-        response = openai.Completion.create(
-            model=model,
-            prompt=text,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            top_p=top_p,
-            n=n,
-            frequency_penalty=frequency_penalty,
-            presence_penalty=presence_penalty,
-            logprobs=logprobs
-        )
-
-        output_context['text'] = response['choices'][0]['text']
+        completion_models = [
+            'text-davinci-002', 
+            'text-davinci-003',
+        ]
+        chat_completion_models = [
+            'gpt-3.5-turbo',
+            'gpt-3.5-turbo-0301',
+        ]
+        if model in completion_models:
+            response = openai.Completion.create(
+                model=model,
+                prompt=text,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=top_p,
+                n=n,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty,
+                logprobs=logprobs
+            )
+            output_context['text'] = response['choices'][0]['text']
+            
+        elif model in chat_completion_models:
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages = [
+                    {'role': chat_role, 'content': text}
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=top_p,
+                n=n,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty,
+            )
+            output_context['text'] = response['choices'][0]['message']['content']
+        else:
+            raise ValueError(f'{model} is not currently supported in this package')
 
         # Get probability of output tokens
-        if display_probability:
+        if display_probability and model in completion_models:
             tokens = response["choices"][0]['logprobs']['tokens']
             token_logprobs = response["choices"][0]['logprobs']['token_logprobs']
             output_context['probability'] = [{'token': token, 'probability': torch.exp(torch.Tensor([logprob])).item()} for token, logprob in zip(tokens, token_logprobs)]
@@ -225,8 +272,19 @@ class OpenAIModelPack:
     # Generate text in prompt loop
     def predict(self, text: str, temperature: float=0, max_tokens: int=100, top_p: float=1, n: int=3, 
                 frequency_penalty: float=0, presence_penalty: float=0, display_probability: bool=False, logprobs: int=1, 
-                prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_last: bool=True) -> dict[str, str]:
-        
+                prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_last: bool=True, 
+                chat_role: str='user') -> dict[str, str]:
+        '''
+        Generates output by prompting a language model from OpenAI
+        '''
+        # Catch input exceptions
+        if not isinstance(text, str):
+            raise TypeError('Input text needs to be of type: string')
+        if not isinstance(prompt_modifier, list):
+            raise TypeError('Input prompt modifier needs to be of type: list')
+        if not isinstance(chat_role, str):
+            raise TypeError('Input chat role needs to be of type: string')
+            
         # Create loop for text prediction
         response_words = 0
         history = []
@@ -245,7 +303,7 @@ class OpenAIModelPack:
             # Call model for text generation
             output_context = self._predict(self.model, text, temperature=temperature, max_tokens=max_tokens, top_p=top_p,
                                            n=n, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
-                                           display_probability=display_probability, logprobs=logprobs)
+                                           display_probability=display_probability, logprobs=logprobs, chat_role=chat_role)
 
             # Terminate loop for next prompt when context contains no meaningful words (less than 2)
             response_words = output_context['text'].replace('\n', '').replace(' ', '')
@@ -262,13 +320,22 @@ class OpenAIModelPack:
     # Generate and execute code using (LM powered function)
     def predict_code(self, text: str, x: Union[int, float, str], variable_names: dict[str, str]={'input': 'x', 'output': 'y'}, 
                      language: str='python', max_tokens: int=500) -> str:
+        '''
+        Generates code output by prompting a language model from OpenAI with a constrained command that is specific for code generation.
+        Variable names are passed into the prompt context to allow the generated code to contain the specified variable names.
+        '''
+        # Catch input exceptions
+        if self.model != 'text-davinci-002':
+            raise ValueError(f"The specified model is '{self.model}'. Only 'text-davinci-002' is supported in this package for code generation")
+        if not isinstance(text, str):
+            raise TypeError('Input text needs to be of type: string')
+        if not isinstance(variable_names, dict):
+            raise TypeError('Input variable names needs to be of type: dict')
+            
         if 'input' not in variable_names:
             variable_names['input'] = 'x'
         if 'output' not in variable_names:
             variable_names['output'] = 'y'
-            
-        if self.model != 'text-davinci-002':
-            raise ValueError(f"The specified model is '{self.model}'. Only 'text-davinci-002' is supported in this package for code generation")
         
         input_vars = f"{variable_names['input']}, {variable_names['output']} = {x}, None" # Set input and output variables
         prompt_prepend = f'Write {language} code to only produce function and input variable x, then call the function without print, without enter input:'
@@ -334,6 +401,8 @@ class ModelPack:
             'openai': [
                 'text-davinci-002', 
                 'text-davinci-003',
+                'gpt-3.5-turbo',
+                'gpt-3.5-turbo-0301',
             ],
         }
 
