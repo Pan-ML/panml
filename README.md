@@ -19,7 +19,7 @@ This package aims to make analysis and experimentation of generative AI/ML model
 
 ## Installation
 ```bash
-git clone https://github.com/Pan-ML/panml.git
+pip install panml
 ```
 
 ## Usage

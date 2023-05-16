@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn.functional as F
 from typing import Union
 
 # Dependencies for vector search
@@ -48,9 +49,13 @@ class FAISSVectorEngine:
         This creates the vector index stored for vector search. 
         By default, mode_args is a dict object specifying the parameters of the base (non-optimised) vector search.
         Optionally, mode_args specifying "mode": "boost" is the boost (optimmised) vector search using index partioning.
-        '''
+        Returns: None. Vectors store is setup and data vectors are then stored in the vectors store
+        '''   
+        # Catch input exceptions
         if not isinstance(corpus, list):
-            raise ValueError('Input text corpus needs to be of type list')
+            raise TypeError('Input corpus needs to be of type: list')
+        if not isinstance(mode_args, dict):
+            raise TypeError('Input model args needs to be of type: dict')
         if len(corpus) < 1:
             raise ValueError('Input text corpus is empty')
         
@@ -67,10 +72,16 @@ class FAISSVectorEngine:
         
     # Perform vector search of query against stored vectors and retrieve top k results
     def search(self, query: str, k: int) -> list[str]:
+        '''
+        Runs vector search of input query against the stored vectors.
+        Returns: list of the top k documents
+        '''
+        # Catch input exceptions
         if not isinstance(query, str):
-            raise ValueError('Input text query needs to be of type str')
+            raise TypeError('Input query needs to be of type: string')
         if not isinstance(k, int):
-            raise ValueError('Input number of returned documents needs to be of type int')
+            raise TypeError('Input number of returned documents needs to be of type int')
+            
         if k > len(self.corpus):
             k = len(self.corpus) # cap the max k to the maximum number of documents in the corpus store
         query_vector = self._get_embedding([query], self.model_emb_source) # embed input vector
