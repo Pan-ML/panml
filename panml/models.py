@@ -12,7 +12,7 @@ import openai
 # HuggingFace model class
 class HuggingFaceModelPack:
     '''
-    Generic model pack class for HuggingFace Hub models
+    Generic HuggingFace Hub model pack class
     '''
     # Initialize class variables
     def __init__(self, model: str, input_block_size: int, padding_length: int, tokenizer_batch: bool, source: str) -> None:
@@ -201,7 +201,7 @@ class HuggingFaceModelPack:
 # OpenAI model class
 class OpenAIModelPack:
     '''
-    OpenAI model class
+    Generic OpenAI model pack class
     '''
     def __init__(self, model: str, api_key: str) -> None:
         self.model = model
