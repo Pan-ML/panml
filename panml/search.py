@@ -49,6 +49,7 @@ class FAISSVectorEngine:
         This creates the vector index stored for vector search. 
         By default, mode_args is a dict object specifying the parameters of the base (non-optimised) vector search.
         Optionally, mode_args specifying "mode": "boost" is the boost (optimmised) vector search using index partioning.
+        Returns: None. Vectors store is setup and data vectors are then stored in the vectors store
         '''   
         # Catch input exceptions
         if not isinstance(corpus, list):
@@ -73,6 +74,7 @@ class FAISSVectorEngine:
     def search(self, query: str, k: int) -> list[str]:
         '''
         Runs vector search of input query against the stored vectors.
+        Returns: list of the top k documents
         '''
         # Catch input exceptions
         if not isinstance(query, str):

@@ -63,6 +63,7 @@ class HuggingFaceModelPack:
                 top_p: float=0.8, top_k: int=0, no_repeat_ngram_size: int=3) -> dict[str, str]:
         '''
         Generates output by prompting a language model from HuggingFace Hub
+        Returns: dict of generated text (text), and token probabilities (probability) and perplexity scores (perplexity) if available
         '''
         # Catch input exceptions
         if not isinstance(text, str):
@@ -123,6 +124,7 @@ class HuggingFaceModelPack:
             instruct: bool=False, num_proc=4) -> None:
         '''
         Fine tuning of a language model from HuggingFace Hub
+        Returns: None. Trained model is saved in the .result/ folder with name "model_" prepended to the specified title
         '''
         # Catch input exceptions
         if not isinstance(x, list):
@@ -276,6 +278,8 @@ class OpenAIModelPack:
                 chat_role: str='user') -> dict[str, str]:
         '''
         Generates output by prompting a language model from OpenAI
+        Returns: dict of generated text (text), and token probabilities (probability) and perplexity scores (perplexity) if available
+        Note: probability and peplexity scores are not calculated for gpt-3.5-turbo models
         '''
         # Catch input exceptions
         if not isinstance(text, str):
@@ -323,6 +327,7 @@ class OpenAIModelPack:
         '''
         Generates code output by prompting a language model from OpenAI with a constrained command that is specific for code generation.
         Variable names are passed into the prompt context to allow the generated code to contain the specified variable names.
+        Returns: generated text of the code
         '''
         # Catch input exceptions
         if self.model != 'text-davinci-002':
