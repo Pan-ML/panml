@@ -361,7 +361,8 @@ class OpenAIModelPack:
         prompt_prepend = f"Write {language} code to only produce function and input variable {variable_names['input']}" # Set instruction context
         prompt_append = f"of variable {variable_names['input']} and return in variable. {input_dataframe_col_names} \
                          Lastly, call function beginning with '{variable_names['output']} = .., and input of {variable_names['input']}'." # Set prompt details
-        prompt_append = f"{prompt_append} do not show print, do not show enter input." # Prevent code context showing print or input functions
+        prompt_append = f"{prompt_append} do not show print, do not show enter input." # Set instruction to prevent code showing print or input functions
+        prompt_append = f"{prompt_append} format the code with relevant indentation." # Set instruction to maintain code layout
         output_context = self.predict(f'{prompt_prepend} {text} {prompt_append}', max_tokens=max_tokens) # Get predicted code snippet
         code_context = f"{input_arg_context}\n{output_context['text']}" # Create code context
 
