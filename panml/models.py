@@ -326,18 +326,22 @@ class OpenAIModelPack:
             return history # returns all historical prediction output
         
     # Generate and execute code using (LM powered function)
-    def predict_code(self, text: str, x: Union[int, float, str], variable_names: dict[str, str]={'input': 'x', 'output': 'y'}, 
+    def predict_code(self, text: str, x: Union[int, float, str, pd.DataFrame], variable_names: dict[str, str]={'input': 'x', 'output': 'y'}, 
                      language: str='python', max_tokens: int=500) -> str:
         '''
         Generates code output by prompting a language model from OpenAI with a constrained command that is specific for code generation.
+        Input variables can be a value, or a pandas dataframe
         Variable names are passed into the prompt context to allow the generated code to contain the specified variable names.
-        Returns: generated text of the code
+        Returns: text of generated code
         '''
         # Catch input exceptions
-        if self.model != 'text-davinci-002':
-            raise ValueError(f"The specified model is '{self.model}'. Only 'text-davinci-002' is supported in this package for code generation")
+        if self.model != 'text-davinci-002' and self.model != 'text-davinci-003':
+            raise ValueError(f"The specified model is '{self.model}'. Only 'text-davinci-002' and 'text-davinci-002' are supported in this package for code generation")
         if not isinstance(text, str):
             raise TypeError('Input text needs to be of type: string')
+        if not isinstance(x, int) and not isinstance(x, float) and \
+            not isinstance(x, str) and not isinstance(x, pd.DataFrame):
+            raise TypeError('Input x needs to be of type: int, float, str or pandas dataframe')
         if not isinstance(variable_names, dict):
             raise TypeError('Input variable names needs to be of type: dict')
             
@@ -346,11 +350,22 @@ class OpenAIModelPack:
         if 'output' not in variable_names:
             variable_names['output'] = 'y'
         
-        input_vars = f"{variable_names['input']}, {variable_names['output']} = {x}, None" # Set input and output variables
-        prompt_prepend = f'Write {language} code to only produce function and input variable x, then call the function without print, without enter input:'
-        prompt_append = f"of variable {variable_names['input']} and return output in {variable_names['output']}" # Set prompt
+        # Prompt logic for code generation
+        input_dataframe_col_names = ''
+        if isinstance(x, pd.DataFrame):
+            input_dataframe_col_names = f" dataframe has columns: {', '.join(x.columns.tolist())}"
+            input_arg_context = f"{variable_names['output']} = None" # Set input and output variables
+        else:
+            input_arg_context = f"{variable_names['input']}, {variable_names['output']} = {x}, None" # Set output variables (if input is dataframe)
+
+        prompt_prepend = f"Write {language} code to only produce function and input variable {variable_names['input']}" # Set instruction context
+        prompt_append = f"of variable {variable_names['input']} and return in variable. {input_dataframe_col_names} \
+                         Lastly, call function beginning with '{variable_names['output']} = .., and input of {variable_names['input']}'." # Set prompt details
+        prompt_append = f"{prompt_append} do not show print, do not show enter input." # Set instruction to prevent code showing print or input functions
+        prompt_append = f"{prompt_append} format the code with relevant indentation." # Set instruction to maintain code layout
         output_context = self.predict(f'{prompt_prepend} {text} {prompt_append}', max_tokens=max_tokens) # Get predicted code snippet
-        code_context = f"{input_vars}\n{output_context['text']}" # Create code context
+        code_context = f"{input_arg_context}\n{output_context['text']}" # Create code context
+
         return code_context
         
     # Embed text
