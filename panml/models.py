@@ -320,10 +320,13 @@ class OpenAIModelPack:
 
             history.append(output_context)
         
-        if keep_last:
-            return history[-1] # returns last prediction output
-        else:
-            return history # returns all historical prediction output
+        try:
+            if keep_last:
+                return history[-1] # returns last prediction output
+            else:
+                return history # returns all historical prediction output
+        except:
+            return {'text': None} # if there is invalid response from the language model, return None
         
     # Generate and execute code using (LM powered function)
     def predict_code(self, text: str, x: Union[int, float, str, pd.DataFrame], variable_names: dict[str, str]={'input': 'x', 'output': 'y'}, 
