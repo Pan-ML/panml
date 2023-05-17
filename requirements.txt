@@ -4,6 +4,7 @@ openai==0.27.6
 pandas==2.0.1
 tokenizers==0.13.3
 transformers==4.29.1
+datasets==2.12.0
 torch==2.0.0
 faiss-cpu==1.7.4
 sentence-transformers==2.2.2
