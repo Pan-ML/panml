@@ -1,0 +1,10 @@
+name: Publsh to PyPi
+on:
+  release:
+    types: [unpublished]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Print release tag"
+        run: echo "${{ github.event.release.tag_name }}"
