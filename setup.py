@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
   name = 'panml',   
   packages = find_packages(),
-  version = '0.0.9',
+  version = '0.0.10',
   license = 'MIT',
   description = 'PanML is a generative AI/ML development toolkit designed for ease of use and fast experimentation.',
   long_description = 'PanML aims to make analysis and experimentation of generative AI/ML models more accessible, by providing a simple and consistent interface to foundation models for Data Scientists, Machine Learning Engineers and Software Developers. \
