@@ -337,8 +337,11 @@ class OpenAIModelPack:
         # Catch input exceptions
         if self.model != 'text-davinci-002':
             raise ValueError(f"The specified model is '{self.model}'. Only 'text-davinci-002' is supported in this package for code generation")
-        if not isinstance(text, str) and not isinstance(text, pd.DataFrame):
-            raise TypeError('Input text needs to be of type: string or pandas dataframe')
+        if not isinstance(text, str):
+            raise TypeError('Input text needs to be of type: string')
+        if not isinstance(x, int) and not isinstance(x, float) and \
+            not isinstance(x, str) and not isinstance(x, pd.DataFrame):
+            raise TypeError('Input x needs to be of type: int, float, str or pandas dataframe')
         if not isinstance(variable_names, dict):
             raise TypeError('Input variable names needs to be of type: dict')
             
@@ -348,9 +351,8 @@ class OpenAIModelPack:
             variable_names['output'] = 'y'
         
         # Prompt logic for code generation
-        input_variable_type = 'dataframe' if 'DataFrame' in str(type(x)) else 'value'
         input_dataframe_col_names = ''
-        if input_variable_type == 'dataframe':
+        if isinstance(x, pd.DataFrame):
             input_dataframe_col_names = f" dataframe has columns: {', '.join(x.columns.tolist())}"
             input_arg_context = f"{variable_names['output']} = None" # Set input and output variables
         else:
@@ -358,9 +360,9 @@ class OpenAIModelPack:
 
         prompt_prepend = f"Write {language} code to only produce function and input variable {variable_names['input']}" # Set instruction context
         prompt_append = f"of variable {variable_names['input']} and return in variable. {input_dataframe_col_names} \
-                        Lastly, call function beginning with '{variable_names['output']} = .., and input of {variable_names['input']}'." # Set prompt details
+                         Lastly, call function beginning with '{variable_names['output']} = .., and input of {variable_names['input']}'." # Set prompt details
         prompt_append = f"{prompt_append} do not show print, do not show enter input." # Prevent code context showing print or input functions
-        output_context = self.model.predict(f'{prompt_prepend} {text} {prompt_append}', max_tokens=max_tokens) # Get predicted code snippet
+        output_context = self.predict(f'{prompt_prepend} {text} {prompt_append}', max_tokens=max_tokens) # Get predicted code snippet
         code_context = f"{input_arg_context}\n{output_context['text']}" # Create code context
 
         return code_context
