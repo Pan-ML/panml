@@ -335,8 +335,8 @@ class OpenAIModelPack:
         Returns: text of generated code
         '''
         # Catch input exceptions
-        if self.model != 'text-davinci-002':
-            raise ValueError(f"The specified model is '{self.model}'. Only 'text-davinci-002' is supported in this package for code generation")
+        if self.model != 'text-davinci-002' and self.model != 'text-davinci-003':
+            raise ValueError(f"The specified model is '{self.model}'. Only 'text-davinci-002' and 'text-davinci-002' are supported in this package for code generation")
         if not isinstance(text, str):
             raise TypeError('Input text needs to be of type: string')
         if not isinstance(x, int) and not isinstance(x, float) and \
