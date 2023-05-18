@@ -1,5 +1,5 @@
 huggingface-hub==0.14.1
-numpy==1.24.3
+numpy==1.22.4
 openai==0.27.6
 pandas==2.0.1
 tokenizers==0.13.3
