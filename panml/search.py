@@ -96,6 +96,9 @@ class FAISSVectorEngine:
         Args: 
         vectors_dir: relative path of the stored vectors FAISS index file
         corpus_dir: relative path of the stored corpus pickle file
+
+        Returns:
+        None. Vectors and corpus are loaded into object attributes
         '''
         # Catch input exceptions
         if not isinstance(vectors_dir, str):
