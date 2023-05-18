@@ -12,7 +12,7 @@ import openai
 # HuggingFace model class
 class HuggingFaceModelPack:
     '''
-    Generic HuggingFace Hub model pack class
+    HuggingFace Hub model pack class
     '''
     # Initialize class variables
     def __init__(self, model: str, input_block_size: int, padding_length: int, tokenizer_batch: bool, source: str) -> None:
@@ -43,6 +43,15 @@ class HuggingFaceModelPack:
     
     # Embed text
     def embedding(self, text: str) -> torch.Tensor:
+        '''
+        Gets the embedding of the text using open source collections of models from HuggingFace Hub
+
+        Args:
+        text: text of the input
+
+        Returns:
+        torch tensor containing the embedding array
+        '''
         token_ids = self.tokenizer.encode(text, return_tensors='pt')
         
         # # Get embeddings
@@ -67,7 +76,22 @@ class HuggingFaceModelPack:
                 top_p: float=0.8, top_k: int=0, no_repeat_ngram_size: int=3) -> dict[str, str]:
         '''
         Generates output by prompting a language model from HuggingFace Hub
-        Returns: dict of generated text (text), and token probabilities (probability) and perplexity scores (perplexity) if available
+
+        Args:
+        text: text of the prompt
+        max_length: parameter from HuggingFace Hub, specifies the max length of tokens generated
+        skip_special_tokens: parameter from HuggingFace Hub, specifies whether or not to remove special tokens in the decoding
+        display_probability: show probability of the generated tokens
+        num_return_sequences: parameter from HuggingFace Hub, specifies the number of independently computed returned sequences for each element in the batch
+        temperature: parameter from HuggingFace Hub, specifies the value used to modulate the next token probabilities
+        top_p: parameter from HuggingFace Hub, if set to float < 1, only the smallest set of most probable tokens with probabilities that add up to top_p or higher are kept for generation
+        no_repeat_ngram_size: parameter from HuggingFace Hub, ff set to int > 0, all ngrams of that size can only occur once
+
+        Returns: 
+        dict containing: 
+        text: generated text
+        probability: token probabilities if available
+        perplexity: perplexity score if available
         '''
         # Catch input exceptions
         if not isinstance(text, str):
@@ -128,7 +152,16 @@ class HuggingFaceModelPack:
             instruct: bool=False, num_proc=4) -> None:
         '''
         Fine tuning of a language model from HuggingFace Hub
-        Returns: None. Trained model is saved in the .result/ folder with name "model_" prepended to the specified title
+
+        Args:
+        x: list of example text for training/fine tuning the language model
+        y: list of example text as targets for training/fine tuning the language model. 
+        Note: For autogressive based training, this parameter is set to be same as x. For instruct based training, this parameter is part of the target examples for supervised fine tuning.
+        train_args: parameters to be fed into HuggingFace Hub's training_args dict, as required for training
+        num_proc: parameter from HuggingFace Hub, specifies max number of processes when generating cache. Already cached shards are loaded sequentially
+
+        Returns: 
+        None. Trained model is saved in the .result/ folder with name "model_" prepended to the specified title
         '''
         # Catch input exceptions
         if not isinstance(x, list):
@@ -205,7 +238,7 @@ class HuggingFaceModelPack:
 # OpenAI model class
 class OpenAIModelPack:
     '''
-    Generic OpenAI model pack class
+    OpenAI model pack class
     '''
     def __init__(self, model: str, api_key: str) -> None:
         self.model = model
@@ -282,8 +315,27 @@ class OpenAIModelPack:
                 chat_role: str='user') -> dict[str, str]:
         '''
         Generates output by prompting a language model from OpenAI
-        Returns: dict of generated text (text), and token probabilities (probability) and perplexity scores (perplexity) if available
-        Note: probability and peplexity scores are not calculated for gpt-3.5-turbo models
+        
+        Args:
+        text: text of the prompt
+        temperature: temperature of the generated text (for further details please refer to this topic covered in language model text generation)
+        max_tokens: max number of tokens to be generated from OpenAI API
+        top_p: max number of tokens to be generated from OpenAI API
+        n: parameter from OpenAI API (for further details please refer to this topic covered in language model text generation)
+        frequency_penalty: parameter from OpenAI API (for further details please refer to this topic covered in language model text generation)
+        presence_penalty: parameter from OpenAI API (for further details please refer to this topic covered in language model text generation)
+        display_probability: show probability of the generated tokens
+        logprobs: parameter from OpenAI API (for further details please refer to this topic covered in language model text generation)
+        prompt_modifier: list of prompts to be added in the context of multi-stage prompt chaining
+        keep_last: keep or discard the history of responses from the mulit-stage prompt chaining
+        chat_role: parameter from OpenAI API, specifies the role of the LLM assistant. Currently this is available for models of gpt-3.5-turbo or above (for further details please refer to this topic covered in language model text generation)
+
+        Returns: 
+        dict containing: 
+        text: generated text
+        probability: token probabilities if available
+        perplexity: perplexity score if available
+        Note: probability and peplexity scores are calculated only for some OpenAI models in this package
         '''
         # Catch input exceptions
         if not isinstance(text, str):
@@ -333,9 +385,16 @@ class OpenAIModelPack:
                      language: str='python', max_tokens: int=500) -> str:
         '''
         Generates code output by prompting a language model from OpenAI with a constrained command that is specific for code generation.
-        Input variables can be a value, or a pandas dataframe
-        Variable names are passed into the prompt context to allow the generated code to contain the specified variable names.
-        Returns: text of generated code
+        
+        Args:
+        text: text of the prompt
+        x: input variable, can be a value or pandas dataframe
+        variable_names: input variable name, and output variable name of the generated code
+        langauge: programming language of the code to be generated
+        max_tokens: max number of tokens to be generated from OpenAI API
+   
+        Returns: 
+        text of generated code
         '''
         # Catch input exceptions
         if self.model != 'text-davinci-002' and self.model != 'text-davinci-003':
@@ -373,6 +432,16 @@ class OpenAIModelPack:
         
     # Embed text
     def embedding(self, text: str, model: str=None) -> list[float]:
+        '''
+        Gets the embedding of the text using OpenAI language models
+
+        Args:
+        text: text of the input
+        model: name of the OpenAI language model (if not already provided when the class is instantiated)
+
+        Returns:
+        list containing the embedding array
+        '''
         text = text.replace("\n", " ")
         if model is None:
             model = self.model_embedding          
