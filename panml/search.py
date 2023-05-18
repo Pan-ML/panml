@@ -9,6 +9,7 @@ from typing import Union
 import faiss
 from sentence_transformers import SentenceTransformer
 import openai
+import pickle
 
 # FAISS vector search
 class FAISSVectorEngine:
@@ -44,12 +45,20 @@ class FAISSVectorEngine:
             return np.array(df_corpus['corpus'].apply(lambda x: self._get_openai_embedding(x, model=self.model)).tolist())
 
     # Store the corpus as vectors
-    def store(self, corpus: list[str], mode_args: dict[str, Union[str, int, float]]={'mode': 'base'}) -> None:
+    def store(self, corpus: list[str], save_name: str='stored',
+              mode_args: dict[str, Union[str, int, float]]={
+                  'mode': 'base', 
+                }) -> None:
         '''
         This creates the vector index stored for vector search. 
-        By default, mode_args is a dict object specifying the parameters of the base (non-optimised) vector search.
-        Optionally, mode_args specifying "mode": "boost" is the boost (optimmised) vector search using index partioning.
-        Returns: None. Vectors store is setup and data vectors are then stored in the vectors store
+
+        Args:
+        corpus: list of texts containing the document contents forming the corpus to be searched
+        save_name: custom name affix of the vectors and corpus assigned to the saved files (file type extension should not to be included)
+        mode_args: parameters related to FAISS search, affecting different degrees of optimization
+
+        Returns:
+        None. Vectors store is setup, and if specified, the vectors and corpus are saved to files
         '''   
         # Catch input exceptions
         if not isinstance(corpus, list):
@@ -58,23 +67,67 @@ class FAISSVectorEngine:
             raise TypeError('Input model args needs to be of type: dict')
         if len(corpus) < 1:
             raise ValueError('Input text corpus is empty')
+        if save_name is not None:
+            if not isinstance(save_name, str):
+                raise TypeError('Input save name needs to be of type: str')
         
         self.corpus = corpus # store original corpus texts for retrieval during search
         vectors = self._get_embedding(self.corpus, self.model_emb_source) # embed corpus text into vectors
         self.stored_vectors = faiss.IndexFlatL2(vectors.shape[1]) # set FAISS index based on embedding dimension
         self.stored_vectors.add(vectors) # store vectors for search
-        
+
         # Optimised FAISS vector search via index partitioning
         if mode_args['mode'] == 'boost':
             print('Boost (optimised) FAISS vector search not yet implemented')
             # TODO add index partitioning for FAISS search optimisation
             pass
+
+        # Saving the vector store
+        if save_name:
+            faiss.write_index(self.stored_vectors, f"{save_name}_vectors.faiss") # vectors file
+            with open(f"{save_name}_corpus.pkl", "wb") as f: # corpus file
+                pickle.dump(self.corpus, f)
         
+    # Load vectors and corpus
+    def load(self, vectors_dir: str, corpus_dir: str) -> None:
+        '''
+        This loads the stored vectors (FAISS index) and the corresonding corpus (list object) for use in docs search
+        
+        Args: 
+        vectors_dir: relative path of the stored vectors FAISS index file
+        corpus_dir: relative path of the stored corpus pickle file
+
+        Returns:
+        None. Vectors and corpus are loaded into object attributes
+        '''
+        # Catch input exceptions
+        if not isinstance(vectors_dir, str):
+            raise TypeError('Input vectors dir needs to be of type: str')
+        else:
+            if not vectors_dir.endswith('faiss'):
+                raise ValueError('Input vectors directory needs to end with .faiss')
+        if not isinstance(corpus_dir, str):
+            raise TypeError('Input corpus dir needs to be of type: str')
+        else:
+            if not corpus_dir.lower().endswith('pkl'):
+                raise ValueError('Input corpus directory needs to end with .pkl')
+        
+        # Load the vectors and corpus
+        self.stored_vectors = faiss.read_index(f"{vectors_dir}") # load vectors
+        with open(f"{corpus_dir}", "rb") as f: # load corpus
+            self.corpus = pickle.load(f)
+
     # Perform vector search of query against stored vectors and retrieve top k results
     def search(self, query: str, k: int) -> list[str]:
         '''
         Runs vector search of input query against the stored vectors.
-        Returns: list of the top k documents
+        
+        Args:
+        query: text of the search query
+        k: top number of simiilar documents w.r.t the search query
+
+        Returns: 
+        list of the top k documents
         '''
         # Catch input exceptions
         if not isinstance(query, str):
@@ -93,7 +146,7 @@ class VectorEngine:
     '''
     Main vector engine class
     '''
-    def __init__(self, model: str='distilbert-base-nli-stsb-mean-tokens', source: str='faiss', api_key: str=None) -> None:
+    def __init__(self, model: str='all-MiniLM-L6-v2', source: str='faiss', api_key: str=None) -> None:
         self.source = source
         self.model = model
         self.api_key = api_key
@@ -106,7 +159,21 @@ class VectorEngine:
         ]
         self.supported_embedding_models = {
             'huggingface': [
-                'distilbert-base-nli-stsb-mean-tokens', 
+                'all-MiniLM-L6-v2',
+                'all-mpnet-base-v2',
+                'all-distilroberta-v1'
+                'nq-distilbert-base-v1',
+                'paraphrase-albert-small-v2',
+                'paraphrase-MiniLM-L3-v2',
+                'paraphrase-MiniLM-L6-v2',
+                'multi-qa-MiniLM-L6-cos-v1',
+                'multi-qa-distilbert-cos-v1',
+                'msmarco-MiniLM-L6-cos-v5',
+                'distiluse-base-multilingual-cased-v1',
+                'distiluse-base-multilingual-cased-v2',
+                'paraphrase-multilingual-MiniLM-L12-v2',
+                'paraphrase-multilingual-mpnet-base-v2',
+                'distilbert-base-nli-stsb-mean-tokens',
             ],
             'openai': [
                 'text-embedding-ada-002', 
