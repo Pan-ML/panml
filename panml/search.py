@@ -146,7 +146,7 @@ class VectorEngine:
     '''
     Main vector engine class
     '''
-    def __init__(self, model: str='distilbert-base-nli-stsb-mean-tokens', source: str='faiss', api_key: str=None) -> None:
+    def __init__(self, model: str='all-MiniLM-L6-v2', source: str='faiss', api_key: str=None) -> None:
         self.source = source
         self.model = model
         self.api_key = api_key
@@ -159,7 +159,21 @@ class VectorEngine:
         ]
         self.supported_embedding_models = {
             'huggingface': [
-                'distilbert-base-nli-stsb-mean-tokens', 
+                'all-MiniLM-L6-v2',
+                'all-mpnet-base-v2',
+                'all-distilroberta-v1'
+                'nq-distilbert-base-v1',
+                'paraphrase-albert-small-v2',
+                'paraphrase-MiniLM-L3-v2',
+                'paraphrase-MiniLM-L6-v2',
+                'multi-qa-MiniLM-L6-cos-v1',
+                'multi-qa-distilbert-cos-v1',
+                'msmarco-MiniLM-L6-cos-v5',
+                'distiluse-base-multilingual-cased-v1',
+                'distiluse-base-multilingual-cased-v2',
+                'paraphrase-multilingual-MiniLM-L12-v2',
+                'paraphrase-multilingual-mpnet-base-v2',
+                'distilbert-base-nli-stsb-mean-tokens',
             ],
             'openai': [
                 'text-embedding-ada-002', 
