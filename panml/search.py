@@ -45,17 +45,18 @@ class FAISSVectorEngine:
             return np.array(df_corpus['corpus'].apply(lambda x: self._get_openai_embedding(x, model=self.model)).tolist())
 
     # Store the corpus as vectors
-    def store(self, corpus: list[str], save_name: str='stored',
-              mode_args: dict[str, Union[str, int, float]]={
-                  'mode': 'base', 
-                }) -> None:
+    def store(self, corpus: list[str], save_name: str='stored', 
+              mode: str='flat', nlist: int=None, m: int=None, bits: int=None) -> None:
         '''
         This creates the vector index stored for vector search. 
 
         Args:
         corpus: list of texts containing the document contents forming the corpus to be searched
         save_name: custom name affix of the vectors and corpus assigned to the saved files (file type extension should not to be included)
-        mode_args: parameters related to FAISS search, affecting different degrees of optimization
+        mode: parameter of FAISS vector search (flat, ivfflat, ivfpq) can improve speed, at the potentially the trade-off with accuracy
+        nlist: parameter of mode: 'flat', specifies the number of partitions in the vectors space
+        m: parameter of the mode: 'ivfpq', specifies the number of centroid IDs in compressed vectors
+        bits: parameter of mode: 'ivfpq', specifies the number of bits in each centroid
 
         Returns:
         None. Vectors store is setup, and if specified, the vectors and corpus are saved to files
@@ -63,28 +64,64 @@ class FAISSVectorEngine:
         # Catch input exceptions
         if not isinstance(corpus, list):
             raise TypeError('Input corpus needs to be of type: list')
-        if not isinstance(mode_args, dict):
-            raise TypeError('Input model args needs to be of type: dict')
         if len(corpus) < 1:
             raise ValueError('Input text corpus is empty')
         if save_name is not None:
             if not isinstance(save_name, str):
                 raise TypeError('Input save name needs to be of type: str')
+        if not isinstance(mode, str):
+            raise TypeError('Input mode needs to be of type: str')
+        if mode not in ['flat', 'ivfflat', 'ivfpq']:
+            raise ValueError('Supported mode options are: flat, ivfflat, ivfpq')
+        if nlist is not None:
+            if not isinstance(nlist, int):
+                raise TypeError('Input nlist needs to be of type: int')
+            if nlist < 1:
+                raise ValueError('Input nlist needs to be greater or equal to 1')
+        if m is not None:
+            if not isinstance(m, int):
+                raise TypeError('Input m needs to be of type: int')
+            if m < 1:
+                raise ValueError('Input m needs to be greater or equal to 1')
+        if bits is not None:
+            if not isinstance(bits, int):
+                raise TypeError('Input bits needs to be of type: int')
+            if bits < 1:
+                raise ValueError('Input bits needs to be greater or equal to 1')
+        if mode == 'ivfpq' and (m is None or bits is None):
+            raise ValueError('Input m and bits are required for IVFPQ vector search')
         
         self.corpus = corpus # store original corpus texts for retrieval during search
-        vectors = self._get_embedding(self.corpus, self.model_emb_source) # embed corpus text into vectors
-        self.stored_vectors = faiss.IndexFlatL2(vectors.shape[1]) # set FAISS index based on embedding dimension
-        self.stored_vectors.add(vectors) # store vectors for search
-
-        # Optimised FAISS vector search via index partitioning
-        if mode_args['mode'] == 'boost':
-            print('Boost (optimised) FAISS vector search not yet implemented')
-            # TODO add index partitioning for FAISS search optimisation
-            pass
+        emb = self._get_embedding(self.corpus, self.model_emb_source) # embed corpus text into vectors
+        
+        if mode == 'flat': # brute force search with L2 measure (euclidean distance)
+            self.vectors = faiss.IndexFlatL2(emb.shape[1])
+            self.vectors.add(emb) # store vectors for search
+            
+        elif mode == 'ivfflat': # partitioned optimized search with L2 measure
+            if nlist is None:
+                nlist = int((0.5*emb.shape[1])**(1/2)) # default starting nlist value
+            quantizer = faiss.IndexFlatL2(emb.shape[1])
+            self.vectors = faiss.IndexIVFFlat(quantizer, emb.shape[1], nlist)
+            self.vectors.train(emb)
+            self.vectors.add(emb)
+            self.vectors.make_direct_map() # map vectors for vectors retreival
+            
+        elif mode == 'ivfpq': # partitioned optimized search with L2 measure using compressed vectors 
+            if m is not None or bits is not None:
+                if nlist is None:
+                    nlist = int((0.5*emb.shape[1])**(1/2))
+                quantizer = faiss.IndexFlatL2(emb.shape[1])
+                self.vectors = faiss.IndexIVFPQ(quantizer, emb.shape[1], nlist, m, bits)
+                self.vectors.train(emb)
+                self.vectors.add(emb)
+                self.vectors.make_direct_map()
+            else:
+                raise ValueError('IVFPQ vector search not set due to missing m and bits inputs')
 
         # Saving the vector store
         if save_name:
-            faiss.write_index(self.stored_vectors, f"{save_name}_vectors.faiss") # vectors file
+            faiss.write_index(self.vectors, f"{save_name}_vectors.faiss") # vectors file
             with open(f"{save_name}_corpus.pkl", "wb") as f: # corpus file
                 pickle.dump(self.corpus, f)
         
@@ -138,7 +175,7 @@ class FAISSVectorEngine:
         if k > len(self.corpus):
             k = len(self.corpus) # cap the max k to the maximum number of documents in the corpus store
         query_vector = self._get_embedding([query], self.model_emb_source) # embed input vector
-        D, I = self.stored_vectors.search(query_vector, k) # perform vector search
+        D, I = self.vectors.search(query_vector, k) # perform vector search
         return list(np.array(self.corpus)[I][0])
 
 # Entry vector engine class           
