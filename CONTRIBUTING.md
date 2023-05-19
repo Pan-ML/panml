@@ -1,5 +1,5 @@
 # Contributing to PanML
-You're very welcomed to contribute, and we will be excited to have you join us for the development journey! We also encourage you to check out [design framework of PanML](https://github.com/Pan-ML/panml/wiki/Design-framework-of-PanML) to get an idea of roughly the direction we wanted to take with this project.
+You're very welcomed to contribute, and we will be excited to have you join us for the development journey! We also encourage you to check out [design intent of PanML](https://github.com/Pan-ML/wiki/0.-API-design-approach) to get an idea of roughly the direction we wanted to take with this project.
 
 Our discord channel: https://discord.gg/QpquRMDq
 
