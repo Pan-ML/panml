@@ -53,3 +53,7 @@ __pycache__/
 lib/*
 share/*
 bin/*
+
+# Data
+.faiss
+.pkl
