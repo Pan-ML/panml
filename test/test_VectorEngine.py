@@ -77,7 +77,7 @@ class TestVectorEngine(unittest.TestCase):
         with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_SAMPLE = None
-            m.store(TEST_CORPUS_1)
+            m.store(TEST_CORPUS_1, save_name=None)
             output = m.search(TEST_SAMPLE, 3)
 
         # test invalid corpus query input type

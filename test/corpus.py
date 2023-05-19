@@ -1,4 +1,5 @@
 
+# Corpus used for testing
 TEST_CORPUS_1 = [
     'The quick brown fox jumps over the lazy dog', 
     'The quick brown rabbit jumps over the lazy dog', 
