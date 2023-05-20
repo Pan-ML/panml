@@ -234,7 +234,7 @@ class HuggingFaceModelPack:
             trainer.save_model(f'./results/model_{train_args["title"]}') # Save trained model
 
     # Save model
-    def save(self, save_name: str=None) -> None:
+    def save(self, save_dir: str=None) -> None:
         '''
         Save the model on demand
 
@@ -244,6 +244,6 @@ class HuggingFaceModelPack:
         Returns:
         None. File is saved at the specified location
         '''
-        if save_name is None:
-            save_name = f'./results/model_{self.model_name}'
-        self.model_hf.save_pretrained(f'./results/{save_name}')
+        if save_dir is None:
+            save_dir = f'./results/model_{self.model_name}'
+        self.model_hf.save_pretrained(save_dir)
