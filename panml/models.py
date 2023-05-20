@@ -44,6 +44,8 @@ class ModelPack:
                 'cerebras/Cerebras-GPT-13B',
                 'EleutherAI/gpt-neo-2.7B',
                 'EleutherAI/gpt-j-6B',
+                'togethercomputer/GPT-JT-6B-v1',
+                'togethercomputer/GPT-NeoXT-Chat-Base-20B',
                 'StabilityAI/stablelm-base-alpha-3b',
                 'StabilityAI/stablelm-base-alpha-7b',
                 'StabilityAI/stablelm-tuned-alpha-3b',
@@ -53,7 +55,6 @@ class ModelPack:
                 'Salesforce/codegen-350M-multi',
                 'Salesforce/codegen-2B-multi',
                 'bigcode/starcoder',
-                'togethercomputer/GPT-NeoXT-Chat-Base-20B',
             ],
             'openai': [
                 'text-davinci-002', 
