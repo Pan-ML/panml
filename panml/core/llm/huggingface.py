@@ -235,6 +235,15 @@ class HuggingFaceModelPack:
 
     # Save model
     def save(self, save_name: str=None) -> None:
+        '''
+        Save the model on demand
+
+        Args:
+        save_name: relative path and name of the file. If name is not provided, the default name is set to "model_<model_name>"
+
+        Returns:
+        None. File is saved at the specified location
+        '''
         if save_name is None:
             save_name = f'./results/model_{self.model_name}'
         self.model_hf.save_pretrained(f'./results/{save_name}')
