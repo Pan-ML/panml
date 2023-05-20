@@ -11,21 +11,8 @@ class HuggingFaceModelPack:
     HuggingFace Hub model pack class
     '''
     # Initialize class variables
-    def __init__(self, model: str, input_block_size: int, padding_length: int, tokenizer_batch: bool, source: str) -> None:
-        if source == 'huggingface':
-            if 'flan' in model:
-                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(model)
-            else:
-                self.model_hf = AutoModelForCausalLM.from_pretrained(model)
-        elif source == 'local':
-            if 'flan' in model:
-                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(model, local_files_only=True)
-            else:
-                self.model_hf = AutoModelForCausalLM.from_pretrained(model, local_files_only=True)
-        if self.model_hf.config.tokenizer_class:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
-        else:
-            self.tokenizer = AutoTokenizer.from_pretrained(model, mirror='https://huggingface.co')
+    def __init__(self, model: str, input_block_size: int, padding_length: int, tokenizer_batch: bool, source: str, model_args: dict) -> None:
+        self.model_name = model
         self.padding_length = padding_length
         self.input_block_size = input_block_size
         self.tokenizer_batch = tokenizer_batch
@@ -33,6 +20,21 @@ class HuggingFaceModelPack:
                                    'per_device_train_batch_size', 'per_device_eval_batch_size',
                                    'warmup_steps', 'weight_decay', 'logging_steps', 
                                    'output_dir', 'logging_dir', 'save_model']
+        
+        if source == 'huggingface':
+            if 'flan' in self.model_name:
+                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args)
+            else:
+                self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
+        elif source == 'local':
+            if 'flan' in self.model_name:
+                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+            else:
+                self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+        if self.model_hf.config.tokenizer_class:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
         
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.model_hf.config.eos_token_id
@@ -230,3 +232,9 @@ class HuggingFaceModelPack:
         
         if train_args['save_model']:
             trainer.save_model(f'./results/model_{train_args["title"]}') # Save trained model
+
+    # Save model
+    def save(self, save_name: str=None) -> None:
+        if save_name is None:
+            save_name = f"./results/model_{self.model_name}"
+        self.model_hf.save_pretrained(f"./results/{save_name}")

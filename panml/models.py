@@ -4,8 +4,8 @@ from typing import Union
 
 # Dependencies for specialised language model implementations
 from transformers import AutoTokenizer
-from panml.base_models.huggingface import HuggingFaceModelPack
-from panml.base_models.openai import OpenAIModelPack
+from panml.core.llm.huggingface import HuggingFaceModelPack
+from panml.core.llm.openai import OpenAIModelPack
         
 # Entry model pack class           
 class ModelPack:
@@ -13,7 +13,7 @@ class ModelPack:
     Main model pack class
     '''
     def __init__(self, model: str, tokenizer: AutoTokenizer=None, input_block_size: int=20, padding_length: int=100, 
-                 tokenizer_batch: bool=False, source: str='huggingface', api_key: str=None) -> None:
+                 tokenizer_batch: bool=False, source: str='huggingface', api_key: str=None, model_args={}) -> None:
         self.padding_length = padding_length
         self.tokenizer = tokenizer
         self.model = model
@@ -21,6 +21,7 @@ class ModelPack:
         self.tokenizer_batch = tokenizer_batch
         self.source = source
         self.api_key = api_key
+        self.model_args = model_args
         
         # Accepted models from sources
         self.supported_models = {
@@ -51,6 +52,8 @@ class ModelPack:
                 'h2oai/h2ogpt-oasst1-512-20b',
                 'Salesforce/codegen-350M-multi',
                 'Salesforce/codegen-2B-multi',
+                'bigcode/starcoder',
+                'togethercomputer/GPT-NeoXT-Chat-Base-20B',
             ],
             'openai': [
                 'text-davinci-002', 
@@ -75,11 +78,11 @@ class ModelPack:
         if self.source == 'huggingface':
             if self.model not in self.supported_models['huggingface']:
                 raise ValueError('The specified model is currently not supported in this package. Supported HuggingFace Hub models are: ' + ' '.join([f"{m}" for m in self.supported_models['huggingface']]))
-            self.instance = HuggingFaceModelPack(self.model, self.input_block_size, self.padding_length, self.tokenizer_batch, self.source)
+            self.instance = HuggingFaceModelPack(self.model, self.input_block_size, self.padding_length, self.tokenizer_batch, self.source, self.model_args)
 
         # Locally trained model call of HuggingFace Hub model
         elif self.source == 'local':
-            self.instance = HuggingFaceModelPack(self.model, self.input_block_size, self.padding_length, self.tokenizer_batch, self.source)
+            self.instance = HuggingFaceModelPack(self.model, self.input_block_size, self.padding_length, self.tokenizer_batch, self.source, self.model_args)
 
         # OpenAI model call
         elif self.source == 'openai':

@@ -1,4 +1,5 @@
 import pandas as pd
+import torch
 from typing import Union
 import openai
 
@@ -8,13 +9,13 @@ class OpenAIModelPack:
     OpenAI model pack class
     '''
     def __init__(self, model: str, api_key: str) -> None:
-        self.model = model
+        self.model_name = model
         self.model_embedding = 'text-embedding-ada-002'
         openai.api_key = api_key
     
     # Generate text of single model call
     @staticmethod
-    def _predict(model: str, text: str, temperature: float, max_tokens: int, top_p: float, n: int, 
+    def _predict(model_name: str, text: str, temperature: float, max_tokens: int, top_p: float, n: int, 
                  frequency_penalty: float, presence_penalty: float, display_probability: bool, logprobs: int, 
                  chat_role: str) -> dict[str, str]:
         '''
@@ -33,9 +34,9 @@ class OpenAIModelPack:
             'gpt-3.5-turbo',
             'gpt-3.5-turbo-0301',
         ]
-        if model in completion_models:
+        if model_name in completion_models:
             response = openai.Completion.create(
-                model=model,
+                model=model_name,
                 prompt=text,
                 temperature=temperature,
                 max_tokens=max_tokens,
@@ -47,9 +48,9 @@ class OpenAIModelPack:
             )
             output_context['text'] = response['choices'][0]['text']
             
-        elif model in chat_completion_models:
+        elif model_name in chat_completion_models:
             response = openai.ChatCompletion.create(
-                model=model,
+                model=model_name,
                 messages = [
                     {'role': chat_role, 'content': text}
                 ],
@@ -62,10 +63,10 @@ class OpenAIModelPack:
             )
             output_context['text'] = response['choices'][0]['message']['content']
         else:
-            raise ValueError(f'{model} is not currently supported in this package')
+            raise ValueError(f'{model_name} is not currently supported in this package')
 
         # Get probability of output tokens
-        if display_probability and model in completion_models:
+        if display_probability and model_name in completion_models:
             tokens = response["choices"][0]['logprobs']['tokens']
             token_logprobs = response["choices"][0]['logprobs']['token_logprobs']
             output_context['probability'] = [{'token': token, 'probability': torch.exp(torch.Tensor([logprob])).item()} for token, logprob in zip(tokens, token_logprobs)]
@@ -128,7 +129,7 @@ class OpenAIModelPack:
             text = f"{mod['prepend']} \n {text} \n {mod['append']}"
 
             # Call model for text generation
-            output_context = self._predict(self.model, text, temperature=temperature, max_tokens=max_tokens, top_p=top_p,
+            output_context = self._predict(self.model_name, text, temperature=temperature, max_tokens=max_tokens, top_p=top_p,
                                            n=n, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
                                            display_probability=display_probability, logprobs=logprobs, chat_role=chat_role)
 
@@ -164,8 +165,8 @@ class OpenAIModelPack:
         text of generated code
         '''
         # Catch input exceptions
-        if self.model != 'text-davinci-002' and self.model != 'text-davinci-003':
-            raise ValueError(f"The specified model is '{self.model}'. Only 'text-davinci-002' and 'text-davinci-002' are supported in this package for code generation")
+        if self.model_name != 'text-davinci-002' and self.model_name != 'text-davinci-003':
+            raise ValueError(f"The specified model is '{self.model_name}'. Only 'text-davinci-002' and 'text-davinci-002' are supported in this package for code generation")
         if not isinstance(text, str):
             raise TypeError('Input text needs to be of type: string')
         if not isinstance(x, int) and not isinstance(x, float) and \
