@@ -38,23 +38,23 @@ class TestVectorEngine(unittest.TestCase):
         # test invalid corpus store input type
         with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
-            m.store(1, save_name=None)
+            m.store(1, model_name=None)
 
         # test invalid corpus store input type
         with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
-            m.store(0.2, save_name=None)
+            m.store(0.2, model_name=None)
 
         # test invalid corpus store input type - None
         with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
-            m.store(None, save_name=None)
+            m.store(None, model_name=None)
 
         # test invalid corpus store input value - empty
         with self.assertRaises(ValueError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_CORPUS = []
-            m.store([], save_name=None)
+            m.store([], model_name=None)
 
     # Test case: handle invalid model input
     print('Setup test_faiss_hf_invalid_corpus_input_query')
@@ -63,28 +63,28 @@ class TestVectorEngine(unittest.TestCase):
         with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_SAMPLE = 1
-            m.store(TEST_CORPUS_1, save_name=None)
+            m.store(TEST_CORPUS_1, model_name=None)
             output = m.search(TEST_SAMPLE, 3)
 
         # test invalid corpus query input type
         with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_SAMPLE = 0.2
-            m.store(TEST_CORPUS_1, save_name=None)
+            m.store(TEST_CORPUS_1, model_name=None)
             output = m.search(TEST_SAMPLE, 3)
 
         # test invalid corpus query input type - None
         with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_SAMPLE = None
-            m.store(TEST_CORPUS_1, save_name=None)
+            m.store(TEST_CORPUS_1, model_name=None)
             output = m.search(TEST_SAMPLE, 3)
 
         # test invalid corpus query input type
         with self.assertRaises(TypeError):
             m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
             TEST_SAMPLE = []
-            m.store(TEST_CORPUS_1, save_name=None)
+            m.store(TEST_CORPUS_1, model_name=None)
             output = m.search(TEST_SAMPLE, 3)
 
     # Test case: validate FAISS vector search functionality
@@ -104,7 +104,7 @@ class TestVectorEngine(unittest.TestCase):
         ]
         # Run vector search validation
         m = VectorEngine(source='faiss')
-        m.store(TEST_CORPUS_1, save_name=None)
+        m.store(TEST_CORPUS_1, model_name=None)
         for sample in TEST_SAMPLES:
             output = m.search(sample['text'], sample['k']) # get test output
             self.assertEqual(output, sample['expected_output'], 'FAISS vector search output is not as expected, review may be required.') # check test output against expected output
@@ -117,13 +117,13 @@ class TestVectorEngine(unittest.TestCase):
             m = VectorEngine(model='text-davinci-002', source='faiss')
 
     # Test case: validate FAISS vector store save functionality
-    print('Setup test_faiss_invalid_save_name_vector_store')
-    def test_faiss_invalid_save_name_vector_store(self):
-        # test invalid save name input type
+    print('Setup test_faiss_invalid_model_name_vector_store')
+    def test_faiss_invalid_model_name_vector_store(self):
+        # test invalid model name input type
         with self.assertRaises(TypeError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, save_name=1)
+            m.store(TEST_CORPUS_1, model_name=1)
 
     # Test case: validate FAISS vector store load vectors functionality
     print('Setup test_faiss_invalid_load_vectors_dir')
@@ -172,64 +172,64 @@ class TestVectorEngine(unittest.TestCase):
         with self.assertRaises(TypeError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode=1, save_name=None)
+            m.store(TEST_CORPUS_1, mode=1, model_name=None)
 
         # test invalid input mode value
         with self.assertRaises(ValueError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='flat1', save_name=None)
+            m.store(TEST_CORPUS_1, mode='flat1', model_name=None)
 
         # test invalid input nlist type
         with self.assertRaises(TypeError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='ivfflat', nlist='test', save_name=None)
+            m.store(TEST_CORPUS_1, mode='ivfflat', nlist='test', model_name=None)
 
         # test invalid input nlist value
         with self.assertRaises(ValueError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='ivfflat', nlist=-1, save_name=None)
+            m.store(TEST_CORPUS_1, mode='ivfflat', nlist=-1, model_name=None)
 
         # test invalid input m type
         with self.assertRaises(TypeError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='ivfpq', m='test', bits=8, save_name=None)
+            m.store(TEST_CORPUS_1, mode='ivfpq', m='test', bits=8, model_name=None)
 
         # test invalid input m value
         with self.assertRaises(ValueError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='ivfpq', m=-1, bits=8, save_name=None)
+            m.store(TEST_CORPUS_1, mode='ivfpq', m=-1, bits=8, model_name=None)
 
         # test invalid input bits type
         with self.assertRaises(TypeError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='ivfpq', m=8, bits='test', save_name=None)
+            m.store(TEST_CORPUS_1, mode='ivfpq', m=8, bits='test', model_name=None)
 
         # test invalid input bits value
         with self.assertRaises(ValueError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='ivfpq', m=8, bits=-1, save_name=None)
+            m.store(TEST_CORPUS_1, mode='ivfpq', m=8, bits=-1, model_name=None)
 
         # test missing m for ivfpq
         with self.assertRaises(ValueError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='ivfpq', m=8, save_name=None)
+            m.store(TEST_CORPUS_1, mode='ivfpq', m=8, model_name=None)
 
         # test missing bits for ivfpq
         with self.assertRaises(ValueError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='ivfpq', bits=8, save_name=None)
+            m.store(TEST_CORPUS_1, mode='ivfpq', bits=8, model_name=None)
 
         # test missing both m and q for ivfpq
         with self.assertRaises(ValueError):
             # Run vector search validation
             m = VectorEngine(source='faiss')
-            m.store(TEST_CORPUS_1, mode='ivfpq', save_name=None)
+            m.store(TEST_CORPUS_1, mode='ivfpq', model_name=None)

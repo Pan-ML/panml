@@ -43,14 +43,14 @@ class FAISSVectorEngine:
             return np.array(df_corpus['corpus'].apply(lambda x: self._get_openai_embedding(x, model=self.model)).tolist())
 
     # Store the corpus as vectors
-    def store(self, corpus: list[str], save_name: str='stored', 
+    def store(self, corpus: list[str], model_name: str='stored', 
               mode: str='flat', nlist: int=None, m: int=None, bits: int=None) -> None:
         '''
         This creates the vector index stored for vector search. 
 
         Args:
         corpus: list of texts containing the document contents forming the corpus to be searched
-        save_name: custom name affix of the vectors and corpus assigned to the saved files (file type extension should not to be included)
+        model_name: custom model name affix of the vectors and corpus assigned to the saved files (file type extension should not to be included)
         mode: parameter of FAISS vector search (flat, ivfflat, ivfpq) can improve speed, at the potentially the trade-off with accuracy
         nlist: parameter of mode: 'flat', specifies the number of partitions in the vectors space
         m: parameter of the mode: 'ivfpq', specifies the number of centroid IDs in compressed vectors
@@ -64,8 +64,8 @@ class FAISSVectorEngine:
             raise TypeError('Input corpus needs to be of type: list')
         if len(corpus) < 1:
             raise ValueError('Input text corpus is empty')
-        if save_name is not None:
-            if not isinstance(save_name, str):
+        if model_name is not None:
+            if not isinstance(model_name, str):
                 raise TypeError('Input save name needs to be of type: str')
         if not isinstance(mode, str):
             raise TypeError('Input mode needs to be of type: str')
@@ -118,9 +118,9 @@ class FAISSVectorEngine:
                 raise ValueError('IVFPQ vector search not set due to missing m and bits inputs')
 
         # Saving the vector store
-        if save_name:
-            faiss.write_index(self.vectors, f"{save_name}_vectors.faiss") # vectors file
-            with open(f"{save_name}_corpus.pkl", "wb") as f: # corpus file
+        if model_name:
+            faiss.write_index(self.vectors, f"{model_name}_vectors.faiss") # vectors file
+            with open(f"{model_name}_corpus.pkl", "wb") as f: # corpus file
                 pickle.dump(self.corpus, f)
         
     # Load vectors and corpus
