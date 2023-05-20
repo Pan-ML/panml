@@ -239,7 +239,7 @@ class HuggingFaceModelPack:
         Save the model on demand
 
         Args:
-        save_name: relative path and name of the file. If name is not provided, the default name is set to "model_<model_name>"
+        save_dir: relative path of the file. If directory is not provided, the default directory is set to ".results/model_<model_name>"
 
         Returns:
         None. File is saved at the specified location
