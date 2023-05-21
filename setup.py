@@ -25,7 +25,7 @@ setup(
         'datasets>=2.12.0',
         'torch>=2.0.0',
         'tqdm>=4.65.0',
-        'transformers>=4.29.1',
+        'transformers<=4.27.4',
         'faiss-cpu>=1.7.4',
         'sentence-transformers>=2.2.2',
       ],
