@@ -9,9 +9,9 @@ This package aims to make analysis and experimentation of generative AI/ML model
 **Current supported generative AI/ML category** <br>
 *Language models (fine tuning, prompt engineering, prompt tuning, model evaluation)*
 <br><br>
-**Current supported foundation models** <br>
-*[HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others, see [supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models)* <br>
-*[OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5, see [supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models) *
+**Current supported foundation models (see [complete list](https://github.com/Pan-ML/panml/wiki/8.-Supported-models))** <br>
+*[HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others* <br>
+*[OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5 *
 <br><br>
 **Current supported evals** <br>
 *Coming later...*
