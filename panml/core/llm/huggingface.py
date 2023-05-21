@@ -146,8 +146,8 @@ class HuggingFaceModelPack:
         return tokenized_dataset
     
     # Model training
-    def fit(self, x: list[str], y: list[str], train_args: dict[str, Union[str, int, float]]={}, 
-            instruct: bool=False, num_proc=4) -> None:
+    def fit(self, x: Union[list[str], pd.Series], y: Union[list[str], pd.Series], train_args: dict[str, Union[str, int, float]]={}, 
+            instruct: bool=False, num_proc: int=4) -> None:
         '''
         Fine tuning of a language model from HuggingFace Hub
 
@@ -162,12 +162,21 @@ class HuggingFaceModelPack:
         None. Trained model is saved in the .result/ folder with name "model_" prepended to the specified title
         '''
         # Catch input exceptions
+        if isinstance(x, pd.Series): # convert to list from pandas series if available
+            x = x.tolist()
         if not isinstance(x, list):
             raise TypeError('Input data array, x, needs to be of type: list')
+        if isinstance(y, pd.Series): # convert to list from pandas series if available
+            y = y.tolist()
         if not isinstance(y, list):
             raise TypeError('Input data array, y, needs to be of type: list')
         if not isinstance(train_args, dict):
             raise TypeError('Input train args needs to be of type: dict')
+        if not isinstance(num_proc, int):
+            raise TypeError('Input num proc needs to be of type: int')
+        else:
+            if num_proc < 1:
+                raise ValueError('Input num proc cannot be less than 1')
             
         # Convert to tokens format from pandas dataframes
         tokenized_data = self.tokenize_text(x, batched=self.tokenizer_batch, num_proc=num_proc)
