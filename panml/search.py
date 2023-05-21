@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from typing import Union
 
 # Dependencies for vector search
-from panml.base_models.faiss import FAISSVectorEngine
+from panml.core.clustering.faiss import FAISSVectorEngine
 
 # Entry vector engine class           
 class VectorEngine:

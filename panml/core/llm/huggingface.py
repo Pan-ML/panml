@@ -11,21 +11,8 @@ class HuggingFaceModelPack:
     HuggingFace Hub model pack class
     '''
     # Initialize class variables
-    def __init__(self, model: str, input_block_size: int, padding_length: int, tokenizer_batch: bool, source: str) -> None:
-        if source == 'huggingface':
-            if 'flan' in model:
-                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(model)
-            else:
-                self.model_hf = AutoModelForCausalLM.from_pretrained(model)
-        elif source == 'local':
-            if 'flan' in model:
-                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(model, local_files_only=True)
-            else:
-                self.model_hf = AutoModelForCausalLM.from_pretrained(model, local_files_only=True)
-        if self.model_hf.config.tokenizer_class:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
-        else:
-            self.tokenizer = AutoTokenizer.from_pretrained(model, mirror='https://huggingface.co')
+    def __init__(self, model: str, input_block_size: int, padding_length: int, tokenizer_batch: bool, source: str, model_args: dict) -> None:
+        self.model_name = model
         self.padding_length = padding_length
         self.input_block_size = input_block_size
         self.tokenizer_batch = tokenizer_batch
@@ -33,6 +20,21 @@ class HuggingFaceModelPack:
                                    'per_device_train_batch_size', 'per_device_eval_batch_size',
                                    'warmup_steps', 'weight_decay', 'logging_steps', 
                                    'output_dir', 'logging_dir', 'save_model']
+        
+        if source == 'huggingface':
+            if 'flan' in self.model_name:
+                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args)
+            else:
+                self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
+        elif source == 'local':
+            if 'flan' in self.model_name:
+                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+            else:
+                self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+        if self.model_hf.config.tokenizer_class:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
         
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.model_hf.config.eos_token_id
@@ -144,8 +146,8 @@ class HuggingFaceModelPack:
         return tokenized_dataset
     
     # Model training
-    def fit(self, x: list[str], y: list[str], train_args: dict[str, Union[str, int, float]]={}, 
-            instruct: bool=False, num_proc=4) -> None:
+    def fit(self, x: Union[list[str], pd.Series], y: Union[list[str], pd.Series], train_args: dict[str, Union[str, int, float]]={}, 
+            instruct: bool=False, num_proc: int=4) -> None:
         '''
         Fine tuning of a language model from HuggingFace Hub
 
@@ -160,12 +162,21 @@ class HuggingFaceModelPack:
         None. Trained model is saved in the .result/ folder with name "model_" prepended to the specified title
         '''
         # Catch input exceptions
+        if isinstance(x, pd.Series): # convert to list from pandas series if available
+            x = x.tolist()
         if not isinstance(x, list):
             raise TypeError('Input data array, x, needs to be of type: list')
+        if isinstance(y, pd.Series): # convert to list from pandas series if available
+            y = y.tolist()
         if not isinstance(y, list):
             raise TypeError('Input data array, y, needs to be of type: list')
         if not isinstance(train_args, dict):
             raise TypeError('Input train args needs to be of type: dict')
+        if not isinstance(num_proc, int):
+            raise TypeError('Input num proc needs to be of type: int')
+        else:
+            if num_proc < 1:
+                raise ValueError('Input num proc cannot be less than 1')
             
         # Convert to tokens format from pandas dataframes
         tokenized_data = self.tokenize_text(x, batched=self.tokenizer_batch, num_proc=num_proc)
@@ -178,7 +189,7 @@ class HuggingFaceModelPack:
         if instruct:
             print('Setting up training in sequence to sequence format...')
             tokenized_data = tokenized_data.add_column('labels', tokenized_target['input_ids']) # Create target sequence labels
-            data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.model) # Organise data for training
+            data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer) # Organise data for training
             
             # Setup training in sequence to sequence format
             training_args = TrainingArguments(
@@ -230,3 +241,18 @@ class HuggingFaceModelPack:
         
         if train_args['save_model']:
             trainer.save_model(f'./results/model_{train_args["title"]}') # Save trained model
+
+    # Save model
+    def save(self, save_dir: str=None) -> None:
+        '''
+        Save the model on demand
+
+        Args:
+        save_dir: relative path of the file. If directory is not provided, the default directory is set to ".results/model_<model_name>"
+
+        Returns:
+        None. File is saved at the specified location
+        '''
+        if save_dir is None:
+            save_dir = f'./results/model_{self.model_name}'
+        self.model_hf.save_pretrained(save_dir)

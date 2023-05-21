@@ -25,9 +25,10 @@ setup(
         'datasets>=2.12.0',
         'torch>=2.0.0',
         'tqdm>=4.65.0',
-        'transformers>=4.29.1',
+        'transformers<=4.27.4',
         'faiss-cpu>=1.7.4',
         'sentence-transformers>=2.2.2',
+        'accelerate<=0.19.0',
       ],
   classifiers=[
     'Development Status :: 4 - Beta', # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of the package
