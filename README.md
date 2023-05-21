@@ -23,7 +23,7 @@ git clone https://github.com/Pan-ML/panml.git
 ```
 
 ## Usage
-See [quick start guide](https://github.com/Pan-ML/panml/wiki/1.-Quick-start-guide) or other examples in [Wiki](https://github.com/Pan-ML/panml/wiki).
+See [quick start guide](https://github.com/Pan-ML/panml/wiki/1.-Quick-start-guide) or detailed examples in the [PanML Wiki](https://github.com/Pan-ML/panml/wiki).
 
 ### Importing the module
 ```python
