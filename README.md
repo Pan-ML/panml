@@ -49,7 +49,7 @@ print(output['text'])
 ```
 
 ### Fine tune custom LLM
-For more examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM).
+For detailed examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM).
 ```python
 # Specify train args
 train_args = {
@@ -77,6 +77,7 @@ lm.fit(x, y, train_args, instruct=False)
 
 ### Prompt chain engineering
 Create model pack from OpenAI model description and API key.
+For detailed examples, see [prompt chain engineering](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering).
 ```python
 lm = ModelPack(model='text-davinci-002', source='openai', api_key=<your_openai_key>)
 
@@ -106,6 +107,7 @@ Getting enough sleep will help your body to recover from your workouts and will 
 ```
 
 ### Prompted code generation
+For detailed examples, see [prompted code generation](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation).
 ```python
 code = lm.predict_code('calculate the fibonacci sequence using input', x=19, 
                        variable_names={'output': 'ans'}, language='python')
