@@ -180,7 +180,7 @@ class HuggingFaceModelPack:
         if instruct:
             print('Setting up training in sequence to sequence format...')
             tokenized_data = tokenized_data.add_column('labels', tokenized_target['input_ids']) # Create target sequence labels
-            data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer, model=self.model_name) # Organise data for training
+            data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer) # Organise data for training
             
             # Setup training in sequence to sequence format
             training_args = TrainingArguments(
