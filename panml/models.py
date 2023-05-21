@@ -55,6 +55,10 @@ class ModelPack:
                 'Salesforce/codegen-350M-multi',
                 'Salesforce/codegen-2B-multi',
                 'bigcode/starcoder',
+                'bert-base-uncased',
+                'distilbert-base-uncased',
+                'roberta-base',
+                'distilroberta-base',
             ],
             'openai': [
                 'text-davinci-002', 
