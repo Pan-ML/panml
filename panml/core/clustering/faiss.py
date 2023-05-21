@@ -167,8 +167,14 @@ class FAISSVectorEngine:
         # Catch input exceptions
         if not isinstance(query, str):
             raise TypeError('Input query needs to be of type: string')
+        else:
+            if len(query) < 1:
+                raise ValueError('Input query cannot be empty')
         if not isinstance(k, int):
             raise TypeError('Input number of returned documents needs to be of type int')
+        else:
+            if k < 1:
+                raise ValueError('Input k cannot be less than 1')
             
         if k > len(self.corpus):
             k = len(self.corpus) # cap the max k to the maximum number of documents in the corpus store
