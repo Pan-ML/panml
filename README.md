@@ -1,4 +1,4 @@
-## PanML: A simple generative AI/ML development toolkit
+## PanML: A high level generative AI/ML development library
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
 [![](https://dcbadge.vercel.app/api/server/QpquRMDq?compact=true&style=flat)](https://discord.gg/QpquRMDq)
@@ -10,8 +10,8 @@ This package aims to make analysis and experimentation of generative AI/ML model
 *Language models (fine tuning, prompt engineering, prompt tuning, model evaluation)*
 <br><br>
 **Current supported foundation models** <br>
-*[HuggingFace Hub](https://huggingface.co) - open source collections of GPT-2, FLAN-T5, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce language models* <br>
-*[OpenAI](https://openai.com) - text-davinci-002, text-davinci-003 (GPT3/3.5 base completions model) language models*
+*[HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others, see [supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models)* <br>
+*[OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5, see [supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models) *
 <br><br>
 **Current supported evals** <br>
 *Coming later...*
@@ -19,11 +19,11 @@ This package aims to make analysis and experimentation of generative AI/ML model
 
 ## Installation
 ```bash
-pip install panml
+git clone https://github.com/Pan-ML/panml.git
 ```
 
 ## Usage
-Check out the [Quick start guide](https://github.com/Pan-ML/panml/wiki/1.-Quick-start-guide) or other examples in [Wiki](https://github.com/Pan-ML/panml/wiki)
+See [quick start guide](https://github.com/Pan-ML/panml/wiki/1.-Quick-start-guide) or other examples in [Wiki](https://github.com/Pan-ML/panml/wiki).
 
 ### Importing the module
 ```python
@@ -49,6 +49,7 @@ print(output['text'])
 ```
 
 ### Fine tune custom LLM
+For more examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM).
 ```python
 # Specify train args
 train_args = {
@@ -75,7 +76,7 @@ lm.fit(x, y, train_args, instruct=False)
 ```
 
 ### Prompt chain engineering
-Create model pack from OpenAI model description and API key
+Create model pack from OpenAI model description and API key.
 ```python
 lm = ModelPack(model='text-davinci-002', source='openai', api_key=<your_openai_key>)
 
