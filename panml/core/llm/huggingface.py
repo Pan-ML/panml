@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
 from typing import Union
-from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer
 from transformers import TrainingArguments, Trainer, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
 from datasets import Dataset
 
@@ -24,11 +24,15 @@ class HuggingFaceModelPack:
         if source == 'huggingface':
             if 'flan' in self.model_name:
                 self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args)
+            elif 'bert' in self.model_name:
+                self.model_hf = AutoModelForMaskedLM.from_pretrained(self.model_name, **model_args)
             else:
                 self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
         elif source == 'local':
             if 'flan' in self.model_name:
                 self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+            elif 'bert' in self.model_name:
+                self.model_hf = AutoModelForMaskedLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
             else:
                 self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
         if self.model_hf.config.tokenizer_class:
@@ -65,8 +69,9 @@ class HuggingFaceModelPack:
         model_input_params = {'input_ids': token_ids}
         if 'flan' in self.model_hf.name_or_path:
             model_input_params['decoder_input_ids'] = token_ids
-        outputs = self.model_hf(**model_input_params, output_hidden_states=True) 
-        return outputs.hidden_states[-1].mean(dim=1) # values in the last hidden layer averaged across all tokens
+        outputs = self.model_hf(**model_input_params, output_hidden_states=True)
+        hidden_states = 'decoder_hidden_states' if 'flan' in self.model_hf.name_or_path else 'hidden_states'
+        return outputs[hidden_states][-1].mean(dim=1) # values in the last hidden layer averaged across all tokens
     
     # Generate text
     def predict(self, text: str, max_length: int=50, skip_special_tokens: bool=True, 
@@ -214,6 +219,8 @@ class HuggingFaceModelPack:
     
         else:
             print('Setting up training in autoregressive format...')
+            if 'bert' in self.model_hf.name_or_path: # force training task to be mlm for encoders
+                train_args['mlm'] = True
             data_collator = DataCollatorForLanguageModeling(tokenizer=self.tokenizer, mlm=train_args['mlm']) # Organise data for training
             
             # Setup training in autoregressive format
