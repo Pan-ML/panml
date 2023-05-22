@@ -4,7 +4,7 @@
 [![](https://dcbadge.vercel.app/api/server/cCsaqv9KFf?compact=true&style=flat)](https://discord.gg/cCsaqv9KFf)
 
 ## Goal
-This package aims to make analysis and experimentation of generative AI/ML models broadly accessible, by providing a simple and consistent interface to foundation models, and abstract methods to support some of the common use-cases. This includes using smaller, less compute heavy Open Source language models to support the various NLP-based Data Science workflows in the industry. Additionally, we want to empower Data Science projects the tools to easily productionise custom-built generative models.
+This package aims to make analysis and experimentation of generative AI/ML models broadly accessible, by providing a simple and consistent interface to foundation models, and abstract methods to support some of the common use-cases. This includes using smaller, less compute heavy Open Source language models to support the various NLP-based Data Science workflows in the industry. Additionally, we want to empower Data Science projects with the tools to easily productionise custom-built generative models.
 
 
 We are passionate about AI technology and AI safety, and this supports our contribution towards a beneficial outcome in an AI-powered world. Please note this is a work in progress, so very much open for collaboration and contribution. 
@@ -20,12 +20,15 @@ We are passionate about AI technology and AI safety, and this supports our contr
 - [HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others
 - [OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5
 
-### Roadmap (tentative)
+### Roadmap
 
 Model development and analysis
-- Model evaluation (including adversarial evaluation)
+- Support for additional open source and commercial language model
+- Model evaluation methods (including adversarial evaluation)
+- Prompt engineering support and analysis (adding further methods and adding support for more LLMs)
 - Parameter-efficient fine tuning (e.g. LoRA, prompt tuning etc)
-- Model emergent effect simulation and analysis
+- Model intepretability methods
+- Model emergent effect simulation and analysis (related to long term AI safety risks)
 
 Model productionisation
 - Automated refactoring of experimental code into source code
@@ -154,7 +157,6 @@ ans = Fibonacci(x)
 
 Answer: 2584
 ```
-<br>
 
 ## Contributing
 
