@@ -4,10 +4,10 @@
 [![](https://dcbadge.vercel.app/api/server/QpquRMDq?compact=true&style=flat)](https://discord.gg/cCsaqv9KFf)
 
 ## Goal
-This package aims to make analysis and experimentation of generative AI/ML models more accessible, by providing a simple and consistent interface to foundation models for Data Scientists, Machine Learning Engineers and Software Developers. It's a work in progress, so very much open for collaboration and contribution. 
+This package aims to make analysis and experimentation of generative AI/ML models more accessible, by providing a simple and consistent interface to foundation models, and abstract methods to support some of the common use-cases (e.g. document search and retrieval). It's a work in progress, so very much open for collaboration and contribution. 
 <br><br>
-**Current supported generative AI/ML category** <br>
-*Language models (fine tuning, prompt engineering, prompt tuning, model evaluation)*
+**What this covers:** <br>
+*Running LLM experiments in inference, fine tuning, prompt engineering, code generation, document search and retrieval*
 <br><br>
 **Current supported foundation models (see [complete list](https://github.com/Pan-ML/panml/wiki/8.-Supported-models))** <br>
 *[HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others* <br>
@@ -54,7 +54,7 @@ For detailed examples, see [fine tuning your LLM](https://github.com/Pan-ML/panm
 # Specify train args
 train_args = {
     'title': 'my_tuned_gpt2',
-    'num_train_epochs' : 5,
+    'num_train_epochs' : 1,
     'mlm': False,
     'optimizer': 'adamw_torch',
     'per_device_train_batch_size': 10,
