@@ -1,25 +1,47 @@
-## PanML: A high level generative AI/ML development library
+## PanML: A high level generative AI/ML development and analysis library
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
-[![](https://dcbadge.vercel.app/api/server/QpquRMDq?compact=true&style=flat)](https://discord.gg/cCsaqv9KFf)
+[![](https://dcbadge.vercel.app/api/server/cCsaqv9KFf?compact=true&style=flat)](https://discord.gg/cCsaqv9KFf)
 
 ## Goal
-This package aims to make analysis and experimentation of generative AI/ML models more accessible, by providing a simple and consistent interface to foundation models, and abstract methods to support some of the common use-cases (e.g. document search and retrieval). It's a work in progress, so very much open for collaboration and contribution. 
-<br><br>
-**What this covers:** <br>
-*Running LLM experiments in inference, fine tuning, prompt engineering, code generation, document search and retrieval*
-<br><br>
-**Current supported foundation models (see [complete list](https://github.com/Pan-ML/panml/wiki/8.-Supported-models))** <br>
-*[HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others* <br>
-*[OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5 *
-<br><br>
-**Current supported evals** <br>
-*Coming later...*
-<br>
+This package aims to make analysis and experimentation of generative AI/ML models broadly accessible, by providing a simple and consistent interface to foundation models, and abstract methods to support some of the common use-cases. This includes using smaller, less compute heavy Open Source language models to support the various NLP-based Data Science workflows in the industry. Additionally, we want to empower Data Science projects the tools to easily productionise custom-built generative models.
+
+
+We are passionate about AI technology and AI safety, and this supports our contribution towards a beneficial outcome in an AI-powered world. Please note this is a work in progress, so very much open for collaboration and contribution. 
+
+### What this library covers
+- [Inference use-cases and analysis of LLM](https://github.com/Pan-ML/panml/wiki/5.-Generative-model-analysis)
+- [Fine tuning of LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM)
+- [Prompt chain engineering a LLM](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering)
+- [Variable integrated code generation using LLM](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation)
+- [Document search and retrieval using LLM](https://github.com/Pan-ML/panml/wiki/7.-Retrieve-similar-documents-using-vector-search)
+
+### Current supported foundation models (see [complete list](https://github.com/Pan-ML/panml/wiki/8.-Supported-models))
+- [HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others
+- [OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5
+
+### Roadmap (tentative)
+
+Model development and analysis
+- Model evaluation (including adversarial evaluation)
+- Parameter-efficient fine tuning (e.g. LoRA, prompt tuning etc)
+- Model emergent effect simulation and analysis
+
+Model productionisation
+- Automated refactoring of experimental code into source code
+- Automated API wrapper generation
+- Automated dockerization
+
+### Support
+
+You can support us by contributing to this project, as well as providing feedback and ideas in the [issues](https://github.com/Pan-ML/panml/issues) section. 
+
+We would also appreciate if you can give panml a ⭐ on GitHub, and if it adds value to you, sharing this with others in your network on LinkedIn/Twitter/Medium etc who would also find this useful.
+
 
 ## Installation
 ```bash
-git clone https://github.com/Pan-ML/panml.git
+pip install panml
 ```
 
 ## Usage
@@ -132,13 +154,14 @@ ans = Fibonacci(x)
 
 Answer: 2584
 ```
+<br>
 
-# Contributing
+## Contributing
 
-## Pre-requisites
+### Pre-requisites
 - python 3.9x
 
-## Setting up
+### Setting up
 
 ```bash
 git clone https://github.com/Pan-ML/panml.git
@@ -154,7 +177,7 @@ Scripts/activate.bat # if windows cmd
 pip install -r requirements.txt
 ```
 
-## Running tests
+### Running tests
 ```
 python3 -m unittest
 ```
