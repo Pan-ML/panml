@@ -1,17 +1,17 @@
-## PanML: A simple generative AI/ML development toolkit
+## PanML: A high level generative AI/ML development library
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
-[![](https://dcbadge.vercel.app/api/server/QpquRMDq?compact=true&style=flat)](https://discord.gg/QpquRMDq)
+[![](https://dcbadge.vercel.app/api/server/QpquRMDq?compact=true&style=flat)](https://discord.gg/cCsaqv9KFf)
 
 ## Goal
-This package aims to make analysis and experimentation of generative AI/ML models more accessible, by providing a simple and consistent interface to foundation models for Data Scientists, Machine Learning Engineers and Software Developers. It's a work in progress, so very much open for collaboration and contribution. 
+This package aims to make analysis and experimentation of generative AI/ML models more accessible, by providing a simple and consistent interface to foundation models, and abstract methods to support some of the common use-cases (e.g. document search and retrieval). It's a work in progress, so very much open for collaboration and contribution. 
 <br><br>
-**Current supported generative AI/ML category** <br>
-*Language models (fine tuning, prompt engineering, prompt tuning, model evaluation)*
+**What this covers:** <br>
+*Running LLM experiments in inference, fine tuning, prompt engineering, code generation, document search and retrieval*
 <br><br>
-**Current supported foundation models** <br>
-*[HuggingFace Hub](https://huggingface.co) - open source collections of GPT-2, FLAN-T5, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce language models* <br>
-*[OpenAI](https://openai.com) - text-davinci-002, text-davinci-003 (GPT3/3.5 base completions model) language models*
+**Current supported foundation models (see [complete list](https://github.com/Pan-ML/panml/wiki/8.-Supported-models))** <br>
+*[HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others* <br>
+*[OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5 *
 <br><br>
 **Current supported evals** <br>
 *Coming later...*
@@ -19,11 +19,11 @@ This package aims to make analysis and experimentation of generative AI/ML model
 
 ## Installation
 ```bash
-pip install panml
+git clone https://github.com/Pan-ML/panml.git
 ```
 
 ## Usage
-Check out the [Quick start guide](https://github.com/Pan-ML/panml/wiki/1.-Quick-start-guide) or other examples in [Wiki](https://github.com/Pan-ML/panml/wiki)
+See [quick start guide](https://github.com/Pan-ML/panml/wiki/1.-Quick-start-guide) or detailed examples in the [PanML Wiki](https://github.com/Pan-ML/panml/wiki).
 
 ### Importing the module
 ```python
@@ -49,11 +49,12 @@ print(output['text'])
 ```
 
 ### Fine tune custom LLM
+For detailed examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM).
 ```python
 # Specify train args
 train_args = {
     'title': 'my_tuned_gpt2',
-    'num_train_epochs' : 5,
+    'num_train_epochs' : 1,
     'mlm': False,
     'optimizer': 'adamw_torch',
     'per_device_train_batch_size': 10,
@@ -75,7 +76,8 @@ lm.fit(x, y, train_args, instruct=False)
 ```
 
 ### Prompt chain engineering
-Create model pack from OpenAI model description and API key
+Create model pack from OpenAI model description and API key.
+For detailed examples, see [prompt chain engineering](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering).
 ```python
 lm = ModelPack(model='text-davinci-002', source='openai', api_key=<your_openai_key>)
 
@@ -105,6 +107,7 @@ Getting enough sleep will help your body to recover from your workouts and will 
 ```
 
 ### Prompted code generation
+For detailed examples, see [prompted code generation](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation).
 ```python
 code = lm.predict_code('calculate the fibonacci sequence using input', x=19, 
                        variable_names={'output': 'ans'}, language='python')

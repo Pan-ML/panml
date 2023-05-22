@@ -87,6 +87,27 @@ class TestVectorEngine(unittest.TestCase):
             m.store(TEST_CORPUS_1, model_name=None)
             output = m.search(TEST_SAMPLE, 3)
 
+        # test invalid corpus query input is empty
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_SAMPLE = ''
+            m.store(TEST_CORPUS_1, model_name=None)
+            output = m.search(TEST_SAMPLE, 3)
+
+        # test invalid corpus k input type
+        with self.assertRaises(TypeError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_SAMPLE = 'white rabbit'
+            m.store(TEST_CORPUS_1, model_name=None)
+            output = m.search(TEST_SAMPLE, 0.1)
+
+        # test invalid corpus k input is less than 1
+        with self.assertRaises(ValueError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_SAMPLE = 'white rabbit'
+            m.store(TEST_CORPUS_1, model_name=None)
+            output = m.search(TEST_SAMPLE, -1)
+
     # Test case: validate FAISS vector search functionality
     print('Setup test_faiss_hf_vector_search')
     def test_faiss_hf_vector_search(self):
