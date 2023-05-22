@@ -7,7 +7,7 @@
 This package aims to make analysis and experimentation of generative AI/ML models broadly accessible, by providing a simple and consistent interface to foundation models, and abstract methods to support some of the common use-cases. This includes using smaller, less compute heavy Open Source language models to support the various NLP-based Data Science workflows in the industry. Additionally, we want to empower Data Science projects the tools to easily productionise custom-built generative models.
 
 
-We are passionate about AI technology and AI safety, and this supports our contribution towards a benefiticial outcome in an AI-powered world. Please note this is a work in progress, so very much open for collaboration and contribution. 
+We are passionate about AI technology and AI safety, and this supports our contribution towards a beneficial outcome in an AI-powered world. Please note this is a work in progress, so very much open for collaboration and contribution. 
 
 ### What this library covers
 - [Inference use-cases and analysis of LLM](https://github.com/Pan-ML/panml/wiki/5.-Generative-model-analysis)
