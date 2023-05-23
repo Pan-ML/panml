@@ -11,7 +11,7 @@ SIMPLIFY = [
 ]
 
 SUMMARIZE = [
-    {"prepend": "Summarise the following:"}
+    {"prepend": "Summarise the following: "}
 ]
 
 QUESTION_ANSWER = [
