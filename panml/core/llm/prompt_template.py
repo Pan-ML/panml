@@ -19,3 +19,9 @@ QUESTION_ANSWER = [
     {"append": "Break down into details."},
     {"append": "Summarise to the address original question."}
 ]
+
+INTERROGATE = [
+    {"append": ""},
+    {"append": "Explain why this is true: "},
+    {"append": "Explain why this is true: "},
+]
