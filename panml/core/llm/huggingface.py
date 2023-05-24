@@ -45,9 +45,9 @@ class HuggingFaceModelPack:
         if 'gpu' in model_args:
             self.device = 'cuda' if torch.cuda.is_available() and model_args['gpu'] else 'cpu'
             self.model_hf.to(torch.device(self.device))
-            print('Model set on GPU')
+            print('Model processing is set on GPU')
         else:
-            print('Model set on CPU')
+            print('Model processing is set on CPU')
     
     # Embed text
     def embedding(self, text: str) -> torch.Tensor:
