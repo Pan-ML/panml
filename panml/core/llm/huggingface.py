@@ -17,7 +17,7 @@ class HuggingFaceModelPack:
         self.padding_length = padding_length
         self.input_block_size = input_block_size
         self.tokenizer_batch = tokenizer_batch
-        self.device = None
+        self.device = 'cpu'
         self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
                                    'per_device_train_batch_size', 'per_device_eval_batch_size',
                                    'warmup_steps', 'weight_decay', 'logging_steps', 
@@ -44,11 +44,11 @@ class HuggingFaceModelPack:
         # Set model on GPU if available and specified
         if 'gpu' in model_args:
             self.device = 'cuda' if torch.cuda.is_available() and model_args['gpu'] else 'cpu'
-            self.model_hf.to(torch.device(self.device))
             print('Model processing is set on GPU')
         else:
             print('Model processing is set on CPU')
-    
+        self.model_hf.to(torch.device(self.device))
+
     # Embed text
     def embedding(self, text: str) -> torch.Tensor:
         '''
