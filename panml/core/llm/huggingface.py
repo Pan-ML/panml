@@ -26,7 +26,7 @@ class HuggingFaceModelPack:
                 self.device = 'cuda'
             else:
                 print('CUDA is not available')
-        print(f'Model processing is set on {self.device}')
+        print(f'Model processing is set on {self.device.upper()}')
         self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
                                    'per_device_train_batch_size', 'per_device_eval_batch_size',
                                    'warmup_steps', 'weight_decay', 'logging_steps', 
