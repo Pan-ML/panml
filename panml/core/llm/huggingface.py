@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pandas as pd
 import torch
 from typing import Union
@@ -16,11 +17,11 @@ class HuggingFaceModelPack:
         self.padding_length = padding_length
         self.input_block_size = input_block_size
         self.tokenizer_batch = tokenizer_batch
+        self.device = 'cpu'
         self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
                                    'per_device_train_batch_size', 'per_device_eval_batch_size',
                                    'warmup_steps', 'weight_decay', 'logging_steps', 
                                    'output_dir', 'logging_dir', 'save_model']
-        
         if source == 'huggingface':
             if 'flan' in self.model_name:
                 self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args)
@@ -39,10 +40,15 @@ class HuggingFaceModelPack:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
         else:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
-        
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.model_hf.config.eos_token_id
-    
+
+        # Set model on GPU if available and specified
+        if 'gpu' in model_args:
+            self.device = 'cuda' if torch.cuda.is_available() and model_args['gpu'] else 'cpu'
+            print('Model processing is set on GPU')
+        else:
+            print('Model processing is set on CPU')
+        self.model_hf.to(torch.device(self.device))
+
     # Embed text
     def embedding(self, text: str) -> torch.Tensor:
         '''
@@ -54,7 +60,7 @@ class HuggingFaceModelPack:
         Returns:
         torch tensor containing the embedding array
         '''
-        token_ids = self.tokenizer.encode(text, return_tensors='pt')
+        token_ids = self.tokenizer.encode(text, return_tensors='pt').to(torch.device(self.device))
         
         # # Get embeddings
         # if 'flan' in self.model_hf.name_or_path: 
@@ -106,7 +112,7 @@ class HuggingFaceModelPack:
             'perplexity': None,
         }
         
-        input_ids = self.tokenizer.encode(text, return_tensors='pt')
+        input_ids = self.tokenizer.encode(text, return_tensors='pt').to(torch.device(self.device))
         output = self.model_hf.generate(input_ids, 
                                         max_length=max_length,
                                         pad_token_id=self.model_hf.config.eos_token_id,

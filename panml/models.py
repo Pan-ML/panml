@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # Dependencies for data processing and general machine learning implementations
 import torch
 from typing import Union
