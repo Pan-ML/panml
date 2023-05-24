@@ -17,6 +17,7 @@ class HuggingFaceModelPack:
         self.padding_length = padding_length
         self.input_block_size = input_block_size
         self.tokenizer_batch = tokenizer_batch
+        self.device = None
         self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
                                    'per_device_train_batch_size', 'per_device_eval_batch_size',
                                    'warmup_steps', 'weight_decay', 'logging_steps', 
@@ -39,15 +40,10 @@ class HuggingFaceModelPack:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
         else:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
-        
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.model_hf.config.eos_token_id
 
         # Set model on GPU if available and specified
         if 'gpu' in model_args:
             self.device = 'cuda' if torch.cuda.is_available() and model_args['gpu'] else 'cpu'
-
-        if 'cuda' in self.device:
             self.model_hf.to(self.device)
     
     # Embed text
