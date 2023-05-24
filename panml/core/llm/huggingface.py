@@ -44,7 +44,7 @@ class HuggingFaceModelPack:
         # Set model on GPU if available and specified
         if 'gpu' in model_args:
             self.device = 'cuda' if torch.cuda.is_available() and model_args['gpu'] else 'cpu'
-            self.model_hf.to(self.device)
+            self.model_hf.to(torch.device(self.device))
     
     # Embed text
     def embedding(self, text: str) -> torch.Tensor:
@@ -57,10 +57,7 @@ class HuggingFaceModelPack:
         Returns:
         torch tensor containing the embedding array
         '''
-        if 'cuda' in self.device:
-            token_ids = self.tokenizer.encode(text, return_tensors='pt').to(self.device)
-        else:
-            token_ids = self.tokenizer.encode(text, return_tensors='pt')
+        token_ids = self.tokenizer.encode(text, return_tensors='pt').to(torch.device(self.device))
         
         # # Get embeddings
         # if 'flan' in self.model_hf.name_or_path: 
@@ -112,10 +109,7 @@ class HuggingFaceModelPack:
             'perplexity': None,
         }
         
-        if 'cuda' in self.device:
-            input_ids = self.tokenizer.encode(text, return_tensors='pt').to(self.device)
-        else:
-            input_ids = self.tokenizer.encode(text, return_tensors='pt')
+        input_ids = self.tokenizer.encode(text, return_tensors='pt').to(torch.device(self.device))
         output = self.model_hf.generate(input_ids, 
                                         max_length=max_length,
                                         pad_token_id=self.model_hf.config.eos_token_id,
