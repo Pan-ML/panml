@@ -21,7 +21,6 @@ class HuggingFaceModelPack:
                                    'per_device_train_batch_size', 'per_device_eval_batch_size',
                                    'warmup_steps', 'weight_decay', 'logging_steps', 
                                    'output_dir', 'logging_dir', 'save_model']
-        
         if source == 'huggingface':
             if 'flan' in self.model_name:
                 self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args)
@@ -43,6 +42,13 @@ class HuggingFaceModelPack:
         
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.model_hf.config.eos_token_id
+
+        # Set model on GPU if available and specified
+        if 'gpu' in model_args:
+            self.device = 'cuda' if torch.cuda.is_available() and model_args['gpu'] else 'cpu'
+
+        if 'cuda' in self.device:
+            self.model_hf.to(self.device)
     
     # Embed text
     def embedding(self, text: str) -> torch.Tensor:
@@ -55,7 +61,10 @@ class HuggingFaceModelPack:
         Returns:
         torch tensor containing the embedding array
         '''
-        token_ids = self.tokenizer.encode(text, return_tensors='pt')
+        if 'cuda' in self.device:
+            token_ids = self.tokenizer.encode(text, return_tensors='pt').to(self.device)
+        else:
+            token_ids = self.tokenizer.encode(text, return_tensors='pt')
         
         # # Get embeddings
         # if 'flan' in self.model_hf.name_or_path: 
@@ -107,7 +116,10 @@ class HuggingFaceModelPack:
             'perplexity': None,
         }
         
-        input_ids = self.tokenizer.encode(text, return_tensors='pt')
+        if 'cuda' in self.device:
+            input_ids = self.tokenizer.encode(text, return_tensors='pt').to(self.device)
+        else:
+            input_ids = self.tokenizer.encode(text, return_tensors='pt')
         output = self.model_hf.generate(input_ids, 
                                         max_length=max_length,
                                         pad_token_id=self.model_hf.config.eos_token_id,
