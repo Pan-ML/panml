@@ -19,6 +19,8 @@ class HuggingFaceModelPack:
         self.tokenizer_batch = tokenizer_batch
         self.device = 'cpu'
         if 'gpu' in model_args:
+            if not isinstance(model_args['gpu'], bool):
+                raise TypeError('Input model args, gpu needs to be of type: boolean')
             set_gpu = model_args.pop('gpu')
             if torch.cuda.is_available() and set_gpu: # set model processing on GPU else defaults on CPU
                 self.device = 'cuda'
