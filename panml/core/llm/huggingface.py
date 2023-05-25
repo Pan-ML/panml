@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 from typing import Union
 from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer
-from transformers import TrainingArguments, Trainer, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
+from transformers import TrainingArguments, Trainer, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
 from datasets import Dataset
 
 # HuggingFace model class
@@ -295,7 +295,7 @@ class HuggingFaceModelPack:
             data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer) # Organise data for training
             
             # Setup training in sequence to sequence format
-            training_args = TrainingArguments(
+            training_args = Seq2SeqTrainingArguments(
                 optim=train_args['optimizer'], # model optimisation function
                 num_train_epochs=train_args['num_train_epochs'], # total number of training epochs
                 per_device_train_batch_size=train_args['per_device_train_batch_size'],  # batch size per device during training
@@ -343,10 +343,15 @@ class HuggingFaceModelPack:
             )
 
         trainer.train() # Execute training
+
+        print('Getting evaluations...')
+        self.evaluation_result = trainer.evaluate() # Save evaluation result
         
         if train_args['save_model']:
             trainer.save_model(f'./results/model_{train_args["title"]}') # Save trained model
 
+        print('Task completed')
+        
     # Save model
     def save(self, save_dir: str=None) -> None:
         '''
