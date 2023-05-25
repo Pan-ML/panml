@@ -19,6 +19,7 @@ class HuggingFaceModelPack:
         self.tokenizer_batch = tokenizer_batch
         self.prediction_history = []
         self.device = 'cpu'
+        
         if 'gpu' in model_args:
             if not isinstance(model_args['gpu'], bool):
                 raise TypeError('Input model args, gpu needs to be of type: boolean')
@@ -34,6 +35,7 @@ class HuggingFaceModelPack:
                             print('CUDA (GPU support) is not available')
                     except:
                         print('CUDA (GPU support) is not available')
+
         print(f'Model processing is set on {self.device.upper()}')
         self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
                                    'per_device_train_batch_size', 'per_device_eval_batch_size',

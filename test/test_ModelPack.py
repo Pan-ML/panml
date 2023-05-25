@@ -98,4 +98,3 @@ class TestModelPack(unittest.TestCase):
             _ = m.predict([])
 
 
-
