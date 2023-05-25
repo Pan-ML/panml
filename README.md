@@ -94,7 +94,7 @@ df_result = pd.DataFrame(result) # df_result contains columns: text, probability
 
 ### Using open source models from OpenAI
 ```python
-lm = ModelPack(model='text-davinci-003', source='openai', api_key=openai_api_key)
+lm = ModelPack(model='text-davinci-003', source='openai', api_key=<your_openai_key>)
 
 df_test = pd.DataFrame({'prompts': [
     'The goal of life is',
