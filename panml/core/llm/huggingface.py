@@ -18,6 +18,7 @@ class HuggingFaceModelPack:
         self.input_block_size = input_block_size
         self.tokenizer_batch = tokenizer_batch
         self.prediction_history = []
+        self.evaluation_result = None
         self.device = 'cpu'
         
         if 'gpu' in model_args:
@@ -264,11 +265,11 @@ class HuggingFaceModelPack:
         None. Trained model is saved in the .result/ folder with name "model_" prepended to the specified title
         '''
         # Catch input exceptions
-        if not isinstance(x, Union[list, pd.Series]):
+        if not isinstance(x, list) and not isinstance(x, pd.Series):
             raise TypeError('Input data array, x, needs to be of type: list or pandas.series')
         if isinstance(x, pd.Series): # convert to list from pandas series if available
             x = x.tolist()
-        if not isinstance(y, Union[list, pd.Series]):
+        if not isinstance(y, list) and not isinstance(y, pd.Series):
             raise TypeError('Input data array, y, needs to be of type: list or pandas.series')
         if isinstance(y, pd.Series): # convert to list from pandas series if available
             y = y.tolist()
@@ -313,7 +314,7 @@ class HuggingFaceModelPack:
                 eval_dataset=tokenized_data.remove_columns(['text']),
                 data_collator=data_collator,
             )
-    
+            
         else:
             print('Setting up training in autoregressive format...')
             if 'bert' in self.model_hf.name_or_path: # force training task to be mlm for encoders
