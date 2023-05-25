@@ -12,15 +12,25 @@ class OpenAIModelPack:
     def __init__(self, model: str, api_key: str) -> None:
         self.model_name = model
         self.model_embedding = 'text-embedding-ada-002'
+        self.prediction_history = []
         openai.api_key = api_key
     
     # Generate text of single model call
-    @staticmethod
-    def _predict(model_name: str, text: str, temperature: float, max_tokens: int, top_p: float, n: int, 
+    def _predict(self, text: str, temperature: float, max_tokens: int, top_p: float, n: int, 
                  frequency_penalty: float, presence_penalty: float, display_probability: bool, logprobs: int, 
                  chat_role: str) -> dict[str, str]:
         '''
         Base function for text generation using OpenAI models
+
+        Args:
+        See predict function args
+        
+        Returns: 
+        dict containing: 
+        text: generated text
+        probability: token probabilities if available
+        perplexity: perplexity score if available
+        Note: probability and peplexity scores are calculated only for some OpenAI models in this package
         '''
         output_context = {
             'text': None,
@@ -35,9 +45,9 @@ class OpenAIModelPack:
             'gpt-3.5-turbo',
             'gpt-3.5-turbo-0301',
         ]
-        if model_name in completion_models:
+        if self.model_name in completion_models:
             response = openai.Completion.create(
-                model=model_name,
+                model=self.model_name,
                 prompt=text,
                 temperature=temperature,
                 max_tokens=max_tokens,
@@ -49,9 +59,9 @@ class OpenAIModelPack:
             )
             output_context['text'] = response['choices'][0]['text']
             
-        elif model_name in chat_completion_models:
+        elif self.model_name in chat_completion_models:
             response = openai.ChatCompletion.create(
-                model=model_name,
+                model=self.model_name,
                 messages = [
                     {'role': chat_role, 'content': text}
                 ],
@@ -64,10 +74,10 @@ class OpenAIModelPack:
             )
             output_context['text'] = response['choices'][0]['message']['content']
         else:
-            raise ValueError(f'{model_name} is not currently supported in this package')
+            raise ValueError(f'{self.model_name} is not currently supported in this package')
 
         # Get probability of output tokens
-        if display_probability and model_name in completion_models:
+        if display_probability and self.model_name in completion_models:
             tokens = response["choices"][0]['logprobs']['tokens']
             token_logprobs = response["choices"][0]['logprobs']['token_logprobs']
             output_context['probability'] = [{'token': token, 'probability': torch.exp(torch.Tensor([logprob])).item()} for token, logprob in zip(tokens, token_logprobs)]
@@ -78,15 +88,15 @@ class OpenAIModelPack:
         return output_context
     
     # Generate text in prompt loop
-    def predict(self, text: str, temperature: float=0, max_tokens: int=100, top_p: float=1, n: int=3, 
+    def predict(self, text: Union[str, list[str], pd.Series], temperature: float=0, max_tokens: int=100, top_p: float=1, n: int=3, 
                 frequency_penalty: float=0, presence_penalty: float=0, display_probability: bool=False, logprobs: int=1, 
-                prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_last: bool=True, 
+                prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_history: bool=False, 
                 chat_role: str='user') -> dict[str, str]:
         '''
         Generates output by prompting a language model from OpenAI
         
         Args:
-        text: text of the prompt
+        text: text of the prompt, can be a string, list, or pandas.series
         temperature: temperature of the generated text (for further details please refer to this topic covered in language model text generation)
         max_tokens: max number of tokens to be generated from OpenAI API
         top_p: max number of tokens to be generated from OpenAI API
@@ -96,59 +106,70 @@ class OpenAIModelPack:
         display_probability: show probability of the generated tokens
         logprobs: parameter from OpenAI API (for further details please refer to this topic covered in language model text generation)
         prompt_modifier: list of prompts to be added in the context of multi-stage prompt chaining
-        keep_last: keep or discard the history of responses from the mulit-stage prompt chaining
+        keep_history: keep or discard the history of responses from the mulit-stage prompt chaining
         chat_role: parameter from OpenAI API, specifies the role of the LLM assistant. Currently this is available for models of gpt-3.5-turbo or above (for further details please refer to this topic covered in language model text generation)
 
         Returns: 
-        dict containing: 
-        text: generated text
-        probability: token probabilities if available
-        perplexity: perplexity score if available
-        Note: probability and peplexity scores are calculated only for some OpenAI models in this package
+        prediction: list of dict containing generated text with probabilities and perplexity if specified and available
         '''
+        input_context = None
+
         # Catch input exceptions
-        if not isinstance(text, str):
-            raise TypeError('Input text needs to be of type: string')
+        if not isinstance(text, str) and not isinstance(text, list) and not isinstance(text, pd.Series):
+            raise TypeError('Input text needs to be of type: string, list or pandas.series')
+        if isinstance(text, pd.Series): # convert to list from pandas series if available
+            input_context = text.tolist()
+        if isinstance(text, str): # wrap input text into list if available
+            input_context = [text]
         if not isinstance(prompt_modifier, list):
             raise TypeError('Input prompt modifier needs to be of type: list')
         if not isinstance(chat_role, str):
             raise TypeError('Input chat role needs to be of type: string')
             
-        # Create loop for text prediction
-        response_words = 0
-        history = []
-        for count, mod in enumerate(prompt_modifier):
-            # Set prepend or append to empty str if there is no input for these
-            if 'prepend' not in mod: 
-                mod['prepend'] = ''
-            if 'append' not in mod:
-                mod['append'] = ''
+        # Run prediction on text samples
+        prediction = []
+        for context in input_context:
+            # Create loop for text prediction
+            response_words = 0
+            history = []
+            for count, mod in enumerate(prompt_modifier):
+                # Set prepend or append to empty str if there is no input for these
+                if 'prepend' not in mod: 
+                    mod['prepend'] = ''
+                if 'append' not in mod:
+                    mod['append'] = ''
 
-            # Set the query text to previous output to carry on the prompt loop
-            if count > 0:
-                text = output_context['text']
-            text = f"{mod['prepend']} \n {text} \n {mod['append']}"
+                # Set the query text to previous output to carry on the prompt loop
+                if count > 0:
+                    context = output_context['text']
+                context = f"{mod['prepend']} \n {context} \n {mod['append']}"
 
-            # Call model for text generation
-            output_context = self._predict(self.model_name, text, temperature=temperature, max_tokens=max_tokens, top_p=top_p,
-                                           n=n, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
-                                           display_probability=display_probability, logprobs=logprobs, chat_role=chat_role)
+                # Call model for text generation
+                output_context = self._predict(context, temperature=temperature, max_tokens=max_tokens, top_p=top_p,
+                                               n=n, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
+                                               display_probability=display_probability, logprobs=logprobs, chat_role=chat_role)
 
-            # Terminate loop for next prompt when context contains no meaningful words (less than 2)
-            response_words = output_context['text'].replace('\n', '').replace(' ', '')
-            if len(response_words) < 2:
-                break
+                # Terminate loop for next prompt when context contains no meaningful words (less than 2)
+                response_words = output_context['text'].replace('\n', '').replace(' ', '')
+                if len(response_words) < 2:
+                    break
 
-            history.append(output_context)
-        
-        try:
-            if keep_last:
-                return history[-1] # returns last prediction output
-            else:
-                return history # returns all historical prediction output
-        except:
-            return {'text': None} # if there is invalid response from the language model, return None
-        
+                history.append(output_context)
+            
+            try:
+                if keep_history:
+                    prediction.append(history[-1]) # returns last prediction output
+                    self.prediction_history.append(history) # returns all historical prediction output
+                else:
+                    prediction.append(history[-1])
+            except:
+                prediction.append({'text': None}) # if there is invalid response from the language model, return None
+
+        if isinstance(text, str):
+            return prediction[0] # return string text result
+        else:
+            return prediction # return list result
+    
     # Generate and execute code using (LM powered function)
     def predict_code(self, text: str, x: Union[int, float, str, pd.DataFrame], variable_names: dict[str, str]={'input': 'x', 'output': 'y'}, 
                      language: str='python', max_tokens: int=500) -> str:
