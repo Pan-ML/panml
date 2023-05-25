@@ -79,7 +79,7 @@ df_test = pd.DataFrame({'prompts': [
     'The goal of leisure is',
 ]})
 
-result = lm.predict(df_test['prompts'], max_length=20)
+output = lm.predict(df_test['prompts'], max_length=20)
 ```
 ```
 ['The goal of life is to be a',
@@ -88,8 +88,8 @@ result = lm.predict(df_test['prompts'], max_length=20)
 ```
 When set to return token probability and perplexity scores
 ```python
-result = lm.predict(df_test['prompts'], max_length=20, display_probability=True)
-df_result = pd.DataFrame(result) # df_result contains columns: text, probability, perplexity
+output = lm.predict(df_test['prompts'], max_length=20, display_probability=True)
+df_output = pd.DataFrame(output) # df_output contains columns: text, probability, perplexity
 ```
 
 ### Using open source models from OpenAI
@@ -102,7 +102,7 @@ df_test = pd.DataFrame({'prompts': [
     'The goal of leisure is',
 ]})
 
-result = lm.predict(df_test['prompts'])
+output = lm.predict(df_test['prompts'])
 ```
 ```
 [' to live a life of purpose, joy, and fulfillment. To find meaning and purpose in life, it is important to focus on what brings you joy and fulfillment, and to strive to make a positive impact on the world. It is also important to take care of yourself and your relationships, and to be mindful of the choices you make. ',
