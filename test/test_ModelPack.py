@@ -60,4 +60,17 @@ class TestModelPack(unittest.TestCase):
         # test valid model and source match combo 2
         m = ModelPack(model='google/flan-t5-small', source='huggingface')
 
+    # Test case: handle model GPU invalid type
+    print('Setup test_modelpack_incorrect_model_gpu_input')
+    def test_modelpack_incorrect_model_gpu_input(self):
+        # test invalid GPU setting input
+        with self.assertRaises(TypeError):
+            m = ModelPack(model='google/flan-t5-small', source='huggingface', model_args={'gpu': 1})
+
+    # Test case: handle model GPU correct input
+    print('Setup test_modelpack_correct_model_gpu_input')
+    def test_modelpack_correct_model_gpu_input(self):
+        # test valid GPU setting input
+        m = ModelPack(model='google/flan-t5-small', source='huggingface', model_args={'gpu': True})
+
 
