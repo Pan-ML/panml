@@ -108,7 +108,7 @@ class OpenAIModelPack:
         chat_role: parameter from OpenAI API, specifies the role of the LLM assistant. Currently this is available for models of gpt-3.5-turbo or above (for further details please refer to this topic covered in language model text generation)
 
         Returns: 
-        prediction: list of dict containing generated text with probabilities and perplexity if specified and available
+        prediction: list, or list of dict containing generated text with probabilities and perplexity if specified and available
         '''
         input_context = None
 

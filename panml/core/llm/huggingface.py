@@ -161,7 +161,7 @@ class HuggingFaceModelPack:
         no_repeat_ngram_size: parameter from HuggingFace Hub, ff set to int > 0, all ngrams of that size can only occur once
 
         Returns: 
-        prediction: list of dict containing generated text with probabilities and perplexity if specified and available
+        prediction: list, or list of dict containing generated text with probabilities and perplexity if specified and available
         '''
         input_context = None
         
