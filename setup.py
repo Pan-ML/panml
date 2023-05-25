@@ -1,14 +1,18 @@
 from setuptools import setup, find_packages
+
+# read the contents of your README file
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
   name = 'panml', # package name     
   packages = find_packages(exclude=['test']), # package name
   version = '0.0.18', # version
   license = 'MIT', # license
   description = 'PanML is a high level generative AI/ML development library designed for ease of use and fast experimentation.', # short description about the package
-  long_description = 'PanML aims to make analysis and experimentation of generative AI/ML models more accessible, by providing a simple and consistent interface to foundation models for Data Scientists, Machine Learning Engineers and Software Developers. \
-                      The package provides various assistive tools to work with generative language models, such as prompt engineering, fine tuning and others. \
-                      \n\nQuick start guide: https://github.com/Pan-ML/panml/wiki/1.-Quick-start-guide \
-                      \n\nDocumentation/Wiki: https://github.com/Pan-ML/panml/wiki', # long description
+  long_description=long_description,
+  long_description_content_type='text/markdown',
   author = 'PanML team', # team name
   author_email = 'teampanml@gmail.com', # contact email
   url = 'https://github.com/Pan-ML/panml', # url link
