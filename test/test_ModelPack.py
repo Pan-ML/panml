@@ -73,4 +73,28 @@ class TestModelPack(unittest.TestCase):
         # test valid GPU setting input
         m = ModelPack(model='google/flan-t5-small', source='huggingface', model_args={'gpu': True})
 
+    # Test case: handle invalid input text input type
+    print('Setup test_modelpack_invalid_text_input_type')
+    def test_modelpack_invalid_text_input_type(self):
+        # test invalid text input type
+        with self.assertRaises(TypeError):
+            m = ModelPack(model='gpt2', source='huggingface')
+            _ = m.predict(1)
+        
+        with self.assertRaises(TypeError):
+            m = ModelPack(model='gpt2', source='huggingface')
+            _ = m.predict(None)
+
+    # Test case: handle invalid input text input value
+    print('Setup test_modelpack_invalid_text_input_value')
+    def test_modelpack_invalid_text_input_value(self):
+        # test invalid text input value
+        with self.assertRaises(ValueError):
+            m = ModelPack(model='gpt2', source='huggingface')
+            _ = m.predict('')
+
+        with self.assertRaises(ValueError):
+            m = ModelPack(model='gpt2', source='huggingface')
+            _ = m.predict([])
+
 
