@@ -33,9 +33,7 @@ class OpenAIModelPack:
         Note: probability and peplexity scores are calculated only for some OpenAI models in this package
         '''
         output_context = {
-            'text': None,
-            'probability': None,
-            'perplexity': None,
+            'text': None
         }
         completion_models = [
             'text-davinci-002', 
@@ -119,8 +117,15 @@ class OpenAIModelPack:
             raise TypeError('Input text needs to be of type: string, list or pandas.series')
         if isinstance(text, pd.Series): # convert to list from pandas series if available
             input_context = text.tolist()
+            if len(input_context) == 0:
+                raise ValueError('Input text list cannot be empty')
         if isinstance(text, str): # wrap input text into list if available
+            if len(text) == 0:
+                raise ValueError('Input text cannot be empty')
             input_context = [text]
+        if isinstance(text, list):
+            if len(text) == 0:
+                raise ValueError('Input text list cannot be empty')
         if not isinstance(prompt_modifier, list):
             raise TypeError('Input prompt modifier needs to be of type: list')
         if not isinstance(chat_role, str):
@@ -130,7 +135,6 @@ class OpenAIModelPack:
         prediction = []
         for context in input_context:
             # Create loop for text prediction
-            response_words = 0
             history = []
             for count, mod in enumerate(prompt_modifier):
                 # Set prepend or append to empty str if there is no input for these
@@ -150,8 +154,11 @@ class OpenAIModelPack:
                                                display_probability=display_probability, logprobs=logprobs, chat_role=chat_role)
 
                 # Terminate loop for next prompt when context contains no meaningful words (less than 2)
-                response_words = output_context['text'].replace('\n', '').replace(' ', '')
-                if len(response_words) < 2:
+                output_context['text'] = output_context['text'].replace('\n', ' ').replace('\xa0', '').replace('  ', ' ')
+                output_context['text'] = output_context['text'].replace(',', ', ')
+                output_context['text'] = output_context['text'].replace('.', '. ')
+                output_context['text'] = output_context['text'].replace('  ', ' ')
+                if len(output_context['text'].replace(' ', '')) < 2:
                     break
 
                 history.append(output_context)
@@ -165,10 +172,14 @@ class OpenAIModelPack:
             except:
                 prediction.append({'text': None}) # if there is invalid response from the language model, return None
 
+        # Gather output
         if isinstance(text, str):
-            return prediction[0] # return string text result
+            return prediction[0] # return string text as result
         else:
-            return prediction # return list result
+            if display_probability:
+                return prediction # return list of output_context dict as result
+            else:
+                return [pred.get('text', None) for pred in prediction] # return list as result
     
     # Generate and execute code using (LM powered function)
     def predict_code(self, text: str, x: Union[int, float, str, pd.DataFrame], variable_names: dict[str, str]={'input': 'x', 'output': 'y'}, 

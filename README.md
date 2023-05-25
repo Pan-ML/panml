@@ -69,8 +69,45 @@ output = lm.predict('hello world is')
 print(output['text'])
 ```
 ```
-# Output
 'hello world is a place where people can live and work together, and where people can live and work together, and where people can live and work together'
+```
+Run inference on batch of inputs in dataframe
+```python
+df_test = pd.DataFrame({'prompts': [
+    'The goal of life is',
+    'The goal of work is',
+    'The goal of leisure is',
+]})
+
+result = lm.predict(df_test['prompts'], max_length=20)
+```
+```
+['The goal of life is to be a',
+ 'The goal of work is to make a living. ',
+ 'The goal of leisure is to get to the end of the']
+```
+When set to return token probability and perplexity scores
+```python
+result = lm.predict(df_test['prompts'], max_length=20, display_probability=True)
+df_result = pd.DataFrame(result) # df_result contains columns: text, probability, perplexity
+```
+
+### Using open source models from OpenAI
+```python
+lm = ModelPack(model='text-davinci-003', source='openai', api_key=openai_api_key)
+
+df_test = pd.DataFrame({'prompts': [
+    'The goal of life is',
+    'The goal of work is',
+    'The goal of leisure is',
+]})
+
+result = lm.predict(df_test['prompts'])
+```
+```
+[' to live a life of purpose, joy, and fulfillment. To find meaning and purpose in life, it is important to focus on what brings you joy and fulfillment, and to strive to make a positive impact on the world. It is also important to take care of yourself and your relationships, and to be mindful of the choices you make. ',
+ ' The goal of this work is to develop a comprehensive understanding of a particular topic or issue, and to use that understanding to create solutions or strategies that can be implemented to address the issue. ',
+ ' to provide an enjoyable and fulfilling experience that helps to reduce stress, improve physical and mental health, and promote social interaction. Leisure activities can include anything from physical activities such as sports and outdoor recreation, to creative activities such as art and music, to social activities such as attending events or visiting friends. ']
 ```
 
 ### Fine tune custom LLM
@@ -116,8 +153,7 @@ output = lm.predict('What is the best way to live a healthy lifestyle?', prompt_
 output['text']
 ```
 ```
-# Output
-'\nAssuming you are starting from a sedentary lifestyle, a good goal to aim for is 
+'Assuming you are starting from a sedentary lifestyle, a good goal to aim for is 
 30 minutes of moderate-intensity exercise most days of the week. 
 This could include brisk walking, biking, swimming, or using a elliptical trainer. 
 Start with whatever you feel comfortable with and gradually increase your time and intensity as you get more fit. 

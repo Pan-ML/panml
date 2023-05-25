@@ -108,9 +108,7 @@ class HuggingFaceModelPack:
         perplexity: perplexity score if available
         '''
         output_context = {
-            'text': None,
-            'probability': None,
-            'perplexity': None,
+            'text': None
         }
         
         input_ids = self.tokenizer.encode(text, return_tensors='pt').to(torch.device(self.device))
@@ -170,8 +168,15 @@ class HuggingFaceModelPack:
             raise TypeError('Input text needs to be of type: string, list or pandas.series')
         if isinstance(text, pd.Series): # convert to list from pandas series if available
             input_context = text.tolist()
+            if len(input_context) == 0:
+                raise ValueError('Input text list cannot be empty')
         if isinstance(text, str): # wrap input text into list if available
+            if len(text) == 0:
+                raise ValueError('Input text cannot be empty')
             input_context = [text]
+        if isinstance(text, list):
+            if len(text) == 0:
+                raise ValueError('Input text list cannot be empty')
         if not isinstance(prompt_modifier, list):
             raise TypeError('Input prompt modifier needs to be of type: list')
         
@@ -179,7 +184,6 @@ class HuggingFaceModelPack:
         prediction = []
         for context in input_context:
             # Create loop for text prediction
-            response_words = 0
             history = []
             for count, mod in enumerate(prompt_modifier):
                 # Set prepend or append to empty str if there is no input for these
@@ -199,8 +203,11 @@ class HuggingFaceModelPack:
                                                temperature=temperature, top_p=top_p, top_k=top_k, no_repeat_ngram_size=no_repeat_ngram_size)
 
                 # Terminate loop for next prompt when context contains no meaningful words (less than 2)
-                response_words = output_context['text'].replace('\n', '').replace(' ', '')
-                if len(response_words) < 2:
+                output_context['text'] = output_context['text'].replace('\n', ' ').replace('\xa0', '').replace('  ', ' ')
+                output_context['text'] = output_context['text'].replace(',', ', ')
+                output_context['text'] = output_context['text'].replace('.', '. ')
+                output_context['text'] = output_context['text'].replace('  ', ' ')
+                if len(output_context['text'].replace(' ', '')) < 2:
                     break
 
                 history.append(output_context)
@@ -214,10 +221,14 @@ class HuggingFaceModelPack:
             except:
                 prediction.append({'text': None}) # if there is invalid response from the language model, return None
                 
+        # Gather output
         if isinstance(text, str):
-            return prediction[0] # return string text result
+            return prediction[0] # return string text as result
         else:
-            return prediction # return list result
+            if display_probability:
+                return prediction # return list of output_context dict as result
+            else:
+                return [pred.get('text', None) for pred in prediction] # return list as result
     
     # Tokenize function
     def _tokenize_function(self, examples: Dataset) -> Dataset:
