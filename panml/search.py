@@ -1,99 +1,19 @@
+from __future__ import annotations
+
 # Dependencies for data processing and general machine learning implementations
-import numpy as np
-import pandas as pd
 import torch
 import torch.nn.functional as F
 from typing import Union
 
 # Dependencies for vector search
-import faiss
-from sentence_transformers import SentenceTransformer
-import openai
-
-# FAISS vector search
-class FAISSVectorEngine:
-    '''
-    FAISS is Facebook AI Similarity Search, a library that supports efficient vector similarity search across large sets of corpus.
-    Reference source: https://github.com/facebookresearch/faiss
-    Reference tutorial: https://www.pinecone.io/learn/faiss-tutorial/
-    '''
-    def __init__(self, model: str, model_emb_source: str, api_key: str) -> None:
-        self.model = model
-        self.model_emb_source = model_emb_source
-        if self.model_emb_source == 'huggingface':
-            self.model_emb = SentenceTransformer(self.model) # Embedding model using HuggingFace sentence transformer
-        elif self.model_emb_source == 'openai':
-            self.model_emb = None # Embedding model not required with third party API functions
-            if api_key is None:
-                raise ValueError('api key has not been specified for OpenAI model call')
-            openai.api_key = api_key # Set API key
-        else:
-            raise ValueError('Embedding model is not recognised or currently supported')
-        self.corpus = None
-        self.stored_vectors = None
-        
-    def _get_openai_embedding(self, text: str, model: str) -> list[str]:
-        text = text.replace('\n', ' ')
-        return openai.Embedding.create(input=[text], model=model)['data'][0]['embedding']
-    
-    def _get_embedding(self, corpus: list[str], model_emb_source: str) -> np.array:
-        if model_emb_source == 'huggingface':
-            return self.model_emb.encode(corpus)
-        elif model_emb_source == 'openai':
-            df_corpus = pd.DataFrame({'corpus': corpus})
-            return np.array(df_corpus['corpus'].apply(lambda x: self._get_openai_embedding(x, model=self.model)).tolist())
-
-    # Store the corpus as vectors
-    def store(self, corpus: list[str], mode_args: dict[str, Union[str, int, float]]={'mode': 'base'}) -> None:
-        '''
-        This creates the vector index stored for vector search. 
-        By default, mode_args is a dict object specifying the parameters of the base (non-optimised) vector search.
-        Optionally, mode_args specifying "mode": "boost" is the boost (optimmised) vector search using index partioning.
-        Returns: None. Vectors store is setup and data vectors are then stored in the vectors store
-        '''   
-        # Catch input exceptions
-        if not isinstance(corpus, list):
-            raise TypeError('Input corpus needs to be of type: list')
-        if not isinstance(mode_args, dict):
-            raise TypeError('Input model args needs to be of type: dict')
-        if len(corpus) < 1:
-            raise ValueError('Input text corpus is empty')
-        
-        self.corpus = corpus # store original corpus texts for retrieval during search
-        vectors = self._get_embedding(self.corpus, self.model_emb_source) # embed corpus text into vectors
-        self.stored_vectors = faiss.IndexFlatL2(vectors.shape[1]) # set FAISS index based on embedding dimension
-        self.stored_vectors.add(vectors) # store vectors for search
-        
-        # Optimised FAISS vector search via index partitioning
-        if mode_args['mode'] == 'boost':
-            print('Boost (optimised) FAISS vector search not yet implemented')
-            # TODO add index partitioning for FAISS search optimisation
-            pass
-        
-    # Perform vector search of query against stored vectors and retrieve top k results
-    def search(self, query: str, k: int) -> list[str]:
-        '''
-        Runs vector search of input query against the stored vectors.
-        Returns: list of the top k documents
-        '''
-        # Catch input exceptions
-        if not isinstance(query, str):
-            raise TypeError('Input query needs to be of type: string')
-        if not isinstance(k, int):
-            raise TypeError('Input number of returned documents needs to be of type int')
-            
-        if k > len(self.corpus):
-            k = len(self.corpus) # cap the max k to the maximum number of documents in the corpus store
-        query_vector = self._get_embedding([query], self.model_emb_source) # embed input vector
-        D, I = self.stored_vectors.search(query_vector, k) # perform vector search
-        return list(np.array(self.corpus)[I][0])
+from panml.core.clustering.faiss import FAISSVectorEngine
 
 # Entry vector engine class           
 class VectorEngine:
     '''
     Main vector engine class
     '''
-    def __init__(self, model: str='distilbert-base-nli-stsb-mean-tokens', source: str='faiss', api_key: str=None) -> None:
+    def __init__(self, model: str='all-MiniLM-L6-v2', source: str='faiss', api_key: str=None) -> None:
         self.source = source
         self.model = model
         self.api_key = api_key
@@ -106,7 +26,21 @@ class VectorEngine:
         ]
         self.supported_embedding_models = {
             'huggingface': [
-                'distilbert-base-nli-stsb-mean-tokens', 
+                'all-MiniLM-L6-v2',
+                'all-mpnet-base-v2',
+                'all-distilroberta-v1'
+                'nq-distilbert-base-v1',
+                'paraphrase-albert-small-v2',
+                'paraphrase-MiniLM-L3-v2',
+                'paraphrase-MiniLM-L6-v2',
+                'multi-qa-MiniLM-L6-cos-v1',
+                'multi-qa-distilbert-cos-v1',
+                'msmarco-MiniLM-L6-cos-v5',
+                'distiluse-base-multilingual-cased-v1',
+                'distiluse-base-multilingual-cased-v2',
+                'paraphrase-multilingual-MiniLM-L12-v2',
+                'paraphrase-multilingual-mpnet-base-v2',
+                'distilbert-base-nli-stsb-mean-tokens',
             ],
             'openai': [
                 'text-embedding-ada-002', 
