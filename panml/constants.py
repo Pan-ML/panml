@@ -2,8 +2,8 @@
 Constants used in the PanML package
 """
 
-# Supported models for generation
-SUPPORTED_MODELPACK_MODELS = {
+# Supported LLMs for generation
+SUPPORTED_LLMS = {
     'huggingface': [
         'distilgpt2', 
         'gpt2',
@@ -69,7 +69,7 @@ SUPPORTED_OAI_CHAT_MODELS = [
 ]
 
 # Supported sources
-SUPPORTED_MODELPACK_SOURCES = [
+SUPPORTED_LLM_SOURCES = [
     'huggingface', 
     'local', 
     'openai',

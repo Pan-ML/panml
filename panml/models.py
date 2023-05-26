@@ -8,7 +8,7 @@ from typing import Union
 from transformers import AutoTokenizer
 from panml.core.llm.huggingface import HuggingFaceModelPack
 from panml.core.llm.openai import OpenAIModelPack
-from panml.constants import SUPPORTED_MODELPACK_MODELS, SUPPORTED_MODELPACK_SOURCES
+from panml.constants import SUPPORTED_LLMS, SUPPORTED_LLM_SOURCES
 
 # Entry model pack class           
 class ModelPack:
@@ -25,8 +25,8 @@ class ModelPack:
         self.source = source
         self.api_key = api_key
         self.model_args = model_args
-        self.supported_models = SUPPORTED_MODELPACK_MODELS # supported models
-        self.supported_sources = SUPPORTED_MODELPACK_SOURCES # supported source descriptions
+        self.supported_models = SUPPORTED_LLMS # supported models
+        self.supported_sources = SUPPORTED_LLM_SOURCES # supported source descriptions
         
         # General exceptions handling on user input
         if self.source not in self.supported_sources:
