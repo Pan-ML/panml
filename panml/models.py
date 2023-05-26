@@ -8,7 +8,8 @@ from typing import Union
 from transformers import AutoTokenizer
 from panml.core.llm.huggingface import HuggingFaceModelPack
 from panml.core.llm.openai import OpenAIModelPack
-        
+from panml.constants import SUPPORTED_MODELPACK_MODELS, SUPPORTED_MODELPACK_SOURCES
+
 # Entry model pack class           
 class ModelPack:
     '''
@@ -24,58 +25,8 @@ class ModelPack:
         self.source = source
         self.api_key = api_key
         self.model_args = model_args
-        
-        # Accepted models from sources
-        self.supported_models = {
-            'huggingface': [
-                'distilgpt2', 
-                'gpt2',
-                'gpt2-medium',
-                'gpt2-xl',
-                'google/flan-t5-base',
-                'google/flan-t5-small',
-                'google/flan-t5-large',
-                'google/flan-t5-xl',
-                'google/flan-t5-xxl',
-                'cerebras/Cerebras-GPT-111M',
-                'cerebras/Cerebras-GPT-256M',
-                'cerebras/Cerebras-GPT-590M',
-                'cerebras/Cerebras-GPT-1.3B',
-                'cerebras/Cerebras-GPT-2.7B',
-                'cerebras/Cerebras-GPT-6.7B',
-                'cerebras/Cerebras-GPT-13B',
-                'EleutherAI/gpt-neo-2.7B',
-                'EleutherAI/gpt-j-6B',
-                'togethercomputer/GPT-JT-6B-v1',
-                'togethercomputer/GPT-NeoXT-Chat-Base-20B',
-                'StabilityAI/stablelm-base-alpha-3b',
-                'StabilityAI/stablelm-base-alpha-7b',
-                'StabilityAI/stablelm-tuned-alpha-3b',
-                'StabilityAI/stablelm-tuned-alpha-7b',
-                'h2oai/h2ogpt-oasst1-512-12b',
-                'h2oai/h2ogpt-oasst1-512-20b',
-                'Salesforce/codegen-350M-multi',
-                'Salesforce/codegen-2B-multi',
-                'bigcode/starcoder',
-                'bert-base-uncased',
-                'distilbert-base-uncased',
-                'roberta-base',
-                'distilroberta-base',
-            ],
-            'openai': [
-                'text-davinci-002', 
-                'text-davinci-003',
-                'gpt-3.5-turbo',
-                'gpt-3.5-turbo-0301',
-            ],
-        }
-
-        # Accepted source descriptions
-        self.supported_sources = [
-            'huggingface', 
-            'local', 
-            'openai',
-        ]
+        self.supported_models = SUPPORTED_MODELPACK_MODELS # supported models
+        self.supported_sources = SUPPORTED_MODELPACK_SOURCES # supported source descriptions
         
         # General exceptions handling on user input
         if self.source not in self.supported_sources:

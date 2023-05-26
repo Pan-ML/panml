@@ -3,6 +3,7 @@ import pandas as pd
 import torch
 from typing import Union
 import openai
+from panml.constants import SUPPORTED_OAI_CODE_MODELS, SUPPORTED_OAI_COMPLETION_MODELS, SUPPORTED_OAI_CHAT_MODELS
 
 # OpenAI model class
 class OpenAIModelPack:
@@ -13,6 +14,9 @@ class OpenAIModelPack:
         self.model_name = model
         self.model_embedding = 'text-embedding-ada-002'
         self.prediction_history = []
+        self.supported_code_models = SUPPORTED_OAI_CODE_MODELS
+        self.completion_models = SUPPORTED_OAI_COMPLETION_MODELS
+        self.chat_completion_models = SUPPORTED_OAI_CHAT_MODELS
         openai.api_key = api_key
     
     # Generate text of single model call
@@ -35,15 +39,8 @@ class OpenAIModelPack:
         output_context = {
             'text': None
         }
-        completion_models = [
-            'text-davinci-002', 
-            'text-davinci-003',
-        ]
-        chat_completion_models = [
-            'gpt-3.5-turbo',
-            'gpt-3.5-turbo-0301',
-        ]
-        if self.model_name in completion_models:
+        
+        if self.model_name in self.completion_models:
             response = openai.Completion.create(
                 model=self.model_name,
                 prompt=text,
@@ -57,7 +54,7 @@ class OpenAIModelPack:
             )
             output_context['text'] = response['choices'][0]['text']
             
-        elif self.model_name in chat_completion_models:
+        elif self.model_name in self.chat_completion_models:
             response = openai.ChatCompletion.create(
                 model=self.model_name,
                 messages = [
@@ -75,7 +72,7 @@ class OpenAIModelPack:
             raise ValueError(f'{self.model_name} is not currently supported in this package')
 
         # Get probability of output tokens
-        if display_probability and self.model_name in completion_models:
+        if display_probability and self.model_name in self.completion_models:
             tokens = response["choices"][0]['logprobs']['tokens']
             token_logprobs = response["choices"][0]['logprobs']['token_logprobs']
             output_context['probability'] = [{'token': token, 'probability': torch.exp(torch.Tensor([logprob])).item()} for token, logprob in zip(tokens, token_logprobs)]
@@ -198,8 +195,8 @@ class OpenAIModelPack:
         text of generated code
         '''
         # Catch input exceptions
-        if self.model_name != 'text-davinci-002' and self.model_name != 'text-davinci-003':
-            raise ValueError(f"The specified model is '{self.model_name}'. Only 'text-davinci-002' and 'text-davinci-002' are supported in this package for code generation")
+        if self.model_name not in self.supported_code_models:
+            raise ValueError(f"The specified model is '{self.model_name}'. Only {', '.join(self.supported_code_models)} are supported in this package for code generation")
         if not isinstance(text, str):
             raise TypeError('Input text needs to be of type: string')
         if not isinstance(x, int) and not isinstance(x, float) and \
