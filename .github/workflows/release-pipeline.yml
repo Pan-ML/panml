@@ -17,7 +17,19 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install setuptools wheel twine bump2version
       - name: Bump version number
-        run: bump2version minor
+        env:
+          BOT_USERNAME: panmlbot
+          BOT_EMAIL: teampanml@gmail.com
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          set -x
+          git config --global user.name "${BOT_USERNAME}"
+          git config --global user.email "${BOT_EMAIL}"
+          git config --global pull.rebase false
+          BRANCH=${GITHUB_REF#refs/heads/}
+          git remote add ${BOT_USERNAME} https://${BOT_USERNAME}:${BOT_TOKEN}@github.com/$GITHUB_REPOSITORY
+          git pull --no-edit ${BOT_USERNAME} $BRANCH
+          bump2version minor
       - name: Build and publish
         env:
           TWINE_USERNAME: __token__
