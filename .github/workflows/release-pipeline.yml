@@ -19,24 +19,12 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install setuptools wheel twine bump2version
       - name: Bump version number
+        uses: Clinical-Genomics/bump2version-ci@v3
         env:
-          BOT_USERNAME: panmlbot
-          BOT_EMAIL: teampanml@gmail.com
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        run: |
-          set -x
-          git config --global user.name "${BOT_USERNAME}"
-          git config --global user.email "${BOT_EMAIL}"
-          git config --global pull.rebase false
-          BRANCH=${GITHUB_REF#refs/heads/}
-          git remote add ${BOT_USERNAME} https://${BOT_USERNAME}:${BOT_TOKEN}@github.com/$GITHUB_REPOSITORY
-          git pull --no-edit ${BOT_USERNAME} $BRANCH
-          bump2version minor
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.BOT_TOKEN }}
-          branch: ${{ github.ref }}
+          BUMPVERSION_AUTHOR: panmlbot
+          BUMPVERSION_EMAIL: teampanml@gmail.com
+          BUMPVERSION_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
       - name: Build
         run: |
           python setup.py sdist bdist_wheel
