@@ -83,7 +83,7 @@ class OpenAIModelPack:
         return output_context
     
     # Generate text in prompt loop
-    def predict(self, text: Union[str, list[str], pd.Series], temperature: float=0, max_tokens: int=100, top_p: float=1, n: int=3, 
+    def predict(self, text: Union[str, list[str], pd.Series], temperature: float=0, max_length: int=100, top_p: float=1, n: int=3, 
                 frequency_penalty: float=0, presence_penalty: float=0, display_probability: bool=False, logprobs: int=1, 
                 prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_history: bool=False, 
                 chat_role: str='user') -> Union[dict[str, str], list[str]]:
@@ -93,7 +93,7 @@ class OpenAIModelPack:
         Args:
         text: text of the prompt, can be a string, list, or pandas.series
         temperature: temperature of the generated text (for further details please refer to this topic covered in language model text generation)
-        max_tokens: max number of tokens to be generated from OpenAI API
+        max_length: max number of tokens to be generated from OpenAI API
         top_p: max number of tokens to be generated from OpenAI API
         n: parameter from OpenAI API (for further details please refer to this topic covered in language model text generation)
         frequency_penalty: parameter from OpenAI API (for further details please refer to this topic covered in language model text generation)
@@ -146,7 +146,7 @@ class OpenAIModelPack:
                 context = f"{mod['prepend']} \n {context} \n {mod['append']}"
 
                 # Call model for text generation
-                output_context = self._predict(context, temperature=temperature, max_tokens=max_tokens, top_p=top_p,
+                output_context = self._predict(context, temperature=temperature, max_tokens=max_length, top_p=top_p,
                                                n=n, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
                                                display_probability=display_probability, logprobs=logprobs, chat_role=chat_role)
 
