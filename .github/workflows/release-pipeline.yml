@@ -40,8 +40,8 @@ jobs:
           fi
 
           bump2version --config-file .bumpversion.cfg "${VERSION}"
-          git push ***"${REPOSITORY_URI}" HEAD:${BRANCH_NAME}
-          git push ***"${REPOSITORY_URI}" --tags HEAD:${BRANCH_NAME}
+          git push "${REPOSITORY_URI}" HEAD:${BRANCH_NAME}
+          git push "${REPOSITORY_URI}" --tags HEAD:${BRANCH_NAME}
           git pull
 
           # Get the value of latest tag that was just pushed
