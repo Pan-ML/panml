@@ -147,7 +147,7 @@ class HuggingFaceModelPack:
     def predict(self, text: Union[str, list[str], pd.Series], max_length: int=50, skip_special_tokens: bool=True, 
                 display_probability: bool=False, num_return_sequences: int=1, temperature: float=0.8, 
                 top_p: float=0.8, top_k: int=0, no_repeat_ngram_size: int=3, 
-                prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_history: bool=False) -> dict[str, str]:
+                prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_history: bool=False) -> Union[dict[str, str], list[str]]:
         '''
         Generates output by prompting a language model from HuggingFace Hub
 

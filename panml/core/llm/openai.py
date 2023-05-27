@@ -86,7 +86,7 @@ class OpenAIModelPack:
     def predict(self, text: Union[str, list[str], pd.Series], temperature: float=0, max_tokens: int=100, top_p: float=1, n: int=3, 
                 frequency_penalty: float=0, presence_penalty: float=0, display_probability: bool=False, logprobs: int=1, 
                 prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_history: bool=False, 
-                chat_role: str='user') -> dict[str, str]:
+                chat_role: str='user') -> Union[dict[str, str], list[str]]:
         '''
         Generates output by prompting a language model from OpenAI
         
