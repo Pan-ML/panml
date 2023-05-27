@@ -32,7 +32,11 @@ jobs:
           git remote add ${BOT_USERNAME} https://${BOT_USERNAME}:${BOT_TOKEN}@github.com/$GITHUB_REPOSITORY
           git pull --no-edit ${BOT_USERNAME} $BRANCH
           bump2version minor
-          git push ${BOT_USERNAME} HEAD:$BRANCH
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
       - name: Build
         run: |
           python setup.py sdist bdist_wheel
