@@ -5,6 +5,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v2
       - name: Use Python3
@@ -30,11 +32,15 @@ jobs:
           git remote add ${BOT_USERNAME} https://${BOT_USERNAME}:${BOT_TOKEN}@github.com/$GITHUB_REPOSITORY
           git pull --no-edit ${BOT_USERNAME} $BRANCH
           bump2version minor
+          git push ${BOT_USERNAME} HEAD:$BRANCH
       - name: Build
         run: |
           python setup.py sdist bdist_wheel
       - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
+        env:
+          name: pypi
+          url: https://pypi.org/project/panml/
         with:
           user: __token__
           password: ${{ secrets.PYPI_PASSWORD }}
