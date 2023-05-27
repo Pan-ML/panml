@@ -6,21 +6,30 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(
-  name = 'panml', # package name     
-  packages = find_packages(exclude=['test']), # package name
-  version = '0.0.18', # version
-  license = 'MIT', # license
-  description = 'PanML is a high level generative AI/ML development library designed for ease of use and fast experimentation.', # short description about the package
+  name = 'panml',
+  packages = find_packages(),
+  version = '0.0.18',
+  license = 'MIT',
+  description = 'PanML is a high level generative AI/ML development library designed for ease of use and fast experimentation.',
   long_description=long_description,
   long_description_content_type='text/markdown',
-  author = 'PanML team', # team name
-  author_email = 'teampanml@gmail.com', # contact email
-  url = 'https://github.com/Pan-ML/panml', # url link
-  # download_url = 'https://github.com/Pan-ML/panml/archive/refs/tags/v0.0.9.tar.gz', # set a release on GitHub (with release tag) -> Assets -> right click and copy the link
-  keywords = ['generative AI', 'generative model', 'machine learning', 'large language model', # keywords
-              'LLM', 'prompt engineering', 'fine tuning', 'prompt tuning', 'retrieval augmentation', 
-              'AI safety', 'AI alignment'], 
-  install_requires=[  # dependencies
+  author = 'PanML team',
+  author_email = 'teampanml@gmail.com',
+  url = 'https://github.com/Pan-ML/panml',
+  keywords = [
+    'generative AI', 
+    'generative model', 
+    'machine learning', 
+    'large language model',
+    'LLM', 
+    'prompt engineering', 
+    'fine tuning', 
+    'prompt tuning', 
+    'retrieval augmentation', 
+    'AI safety', 
+    'AI alignment'
+    ], 
+  install_requires=[
         'huggingface-hub>=0.14.1',
         'numpy>=1.22.4',
         'openai>=0.27.6',
@@ -36,13 +45,13 @@ setup(
       ],
   classifiers=[
     'Development Status :: 4 - Beta', # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of the package
-    'Intended Audience :: Science/Research', # Define the audience type
+    'Intended Audience :: Science/Research',
     'Intended Audience :: Developers',
     'Intended Audience :: Education',
     'Intended Audience :: Information Technology',
     'Topic :: Software Development :: Build Tools',
-    'License :: OSI Approved :: MIT License', # License
-    'Programming Language :: Python :: 3', # Supported Python versions
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.7', 
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
