@@ -7,6 +7,7 @@ from typing import Union
 
 # Dependencies for vector search
 from panml.core.clustering.faiss import FAISSVectorEngine
+from panml.constants import SUPPORTED_VECTOR_SEARCH_SOURCES, SUPPORTED_EMBEDDING_MODELS
 
 # Entry vector engine class           
 class VectorEngine:
@@ -18,34 +19,8 @@ class VectorEngine:
         self.model = model
         self.api_key = api_key
         self.model_emb_source = None
-
-        # Accepted vectors search from sources
-        self.supported_vector_search = [
-            'faiss', 
-            'pinecone',
-        ]
-        self.supported_embedding_models = {
-            'huggingface': [
-                'all-MiniLM-L6-v2',
-                'all-mpnet-base-v2',
-                'all-distilroberta-v1'
-                'nq-distilbert-base-v1',
-                'paraphrase-albert-small-v2',
-                'paraphrase-MiniLM-L3-v2',
-                'paraphrase-MiniLM-L6-v2',
-                'multi-qa-MiniLM-L6-cos-v1',
-                'multi-qa-distilbert-cos-v1',
-                'msmarco-MiniLM-L6-cos-v5',
-                'distiluse-base-multilingual-cased-v1',
-                'distiluse-base-multilingual-cased-v2',
-                'paraphrase-multilingual-MiniLM-L12-v2',
-                'paraphrase-multilingual-mpnet-base-v2',
-                'distilbert-base-nli-stsb-mean-tokens',
-            ],
-            'openai': [
-                'text-embedding-ada-002', 
-            ],
-        }
+        self.supported_vector_search = SUPPORTED_VECTOR_SEARCH_SOURCES # supported vectors search sources
+        self.supported_embedding_models = SUPPORTED_EMBEDDING_MODELS # supported embedding models
         
         # General exceptions handling on user input
         if self.source not in self.supported_vector_search:

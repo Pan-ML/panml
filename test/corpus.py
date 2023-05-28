@@ -1,3 +1,6 @@
+"""
+Corpus used in the testin of the PanML package
+"""
 
 # Corpus used for testing
 TEST_CORPUS_1 = [
