@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pandas as pd
 import torch
-from typing import Union
+from typing import Union, Callable
 import openai
 from panml.constants import SUPPORTED_OAI_CODE_MODELS, SUPPORTED_OAI_COMPLETION_MODELS, SUPPORTED_OAI_CHAT_MODELS
 
@@ -13,11 +13,14 @@ class OpenAIModelPack:
     def __init__(self, model: str, api_key: str) -> None:
         self.model_name = model
         self.model_embedding = 'text-embedding-ada-002'
-        self.prediction_history = []
+        self.prediction_history = None
         self.supported_code_models = SUPPORTED_OAI_CODE_MODELS
         self.completion_models = SUPPORTED_OAI_COMPLETION_MODELS
         self.chat_completion_models = SUPPORTED_OAI_CHAT_MODELS
         openai.api_key = api_key
+        
+    def _init_prompt(self) -> list[dict[str, Union[str, Callable]]]:
+        return [{'prepend': '', 'append': '', 'transform': None}]
     
     # Generate text of single model call
     def _predict(self, text: str, temperature: float, max_tokens: int, top_p: float, n: int, 
@@ -85,7 +88,7 @@ class OpenAIModelPack:
     # Generate text in prompt loop
     def predict(self, text: Union[str, list[str], pd.Series], temperature: float=0, max_length: int=100, top_p: float=1, n: int=3, 
                 frequency_penalty: float=0, presence_penalty: float=0, display_probability: bool=False, logprobs: int=1, 
-                prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_history: bool=False, 
+                prompt_modifier: list[dict[str, str]]=None, keep_history: bool=False, 
                 chat_role: str='user') -> Union[dict[str, str], list[str]]:
         '''
         Generates output by prompting a language model from OpenAI
@@ -108,6 +111,7 @@ class OpenAIModelPack:
         prediction: list, or list of dict containing generated text with probabilities and perplexity if specified and available
         '''
         input_context = None
+        self.prediction_history = []
 
         # Catch input exceptions
         if not isinstance(text, str) and not isinstance(text, list) and not isinstance(text, pd.Series):
@@ -123,8 +127,11 @@ class OpenAIModelPack:
         if isinstance(text, list):
             if len(text) == 0:
                 raise ValueError('Input text list cannot be empty')
-        if not isinstance(prompt_modifier, list):
-            raise TypeError('Input prompt modifier needs to be of type: list')
+        if prompt_modifier is None:
+            prompt_modifier = self._init_prompt()
+        else:
+            if not isinstance(prompt_modifier, list):
+                raise TypeError('Input prompt modifier needs to be of type: list')
         if not isinstance(chat_role, str):
             raise TypeError('Input chat role needs to be of type: string')
             
@@ -139,11 +146,16 @@ class OpenAIModelPack:
                     mod['prepend'] = ''
                 if 'append' not in mod:
                     mod['append'] = ''
+                if 'transform' not in mod:
+                    mod['transform'] = None
 
                 # Set the query text to previous output to carry on the prompt loop
                 if count > 0:
                     context = output_context['text']
-                context = f"{mod['prepend']} \n {context} \n {mod['append']}"
+                if mod['transform'] is not None and callable(mod['transform']):
+                    context = f"{mod['prepend']}\n{mod['transform'](context)}\n{mod['append']}"
+                else:
+                    context = f"{mod['prepend']}\n{context}\n{mod['append']}"
 
                 # Call model for text generation
                 output_context = self._predict(context, temperature=temperature, max_tokens=max_length, top_p=top_p,
@@ -162,8 +174,8 @@ class OpenAIModelPack:
             
             try:
                 if keep_history:
-                    prediction.append(history[-1]) # returns last prediction output
-                    self.prediction_history.append(history) # returns all historical prediction output
+                    prediction.append(history[-1]) # saves last prediction output
+                    self.prediction_history.append(history) # saves all historical prediction output
                 else:
                     prediction.append(history[-1])
             except:

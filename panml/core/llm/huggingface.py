@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pandas as pd
 import torch
-from typing import Union
+from typing import Union, Callable
 from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer
 from transformers import TrainingArguments, Trainer, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
 from datasets import Dataset
@@ -64,6 +64,10 @@ class HuggingFaceModelPack:
 
         # Set model on GPU if available and specified
         self.model_hf.to(torch.device(self.device))
+        
+    # Set initial prompt
+    def _init_prompt(self) -> list[dict[str, Union[str, Callable]]]:
+        return [{'prepend': '', 'append': '', 'transform': None}]
 
     # Embed text
     def embedding(self, text: str) -> torch.Tensor:
@@ -147,7 +151,7 @@ class HuggingFaceModelPack:
     def predict(self, text: Union[str, list[str], pd.Series], max_length: int=50, skip_special_tokens: bool=True, 
                 display_probability: bool=False, num_return_sequences: int=1, temperature: float=0.8, 
                 top_p: float=0.8, top_k: int=0, no_repeat_ngram_size: int=3, 
-                prompt_modifier: list[dict[str, str]]=[{'prepend': '', 'append': ''}], keep_history: bool=False) -> Union[dict[str, str], list[str]]:
+                prompt_modifier: list[dict[str, Union[str, Callable]]]=None, keep_history: bool=False) -> Union[dict[str, str], list[str]]:
         '''
         Generates output by prompting a language model from HuggingFace Hub
 
@@ -165,7 +169,8 @@ class HuggingFaceModelPack:
         prediction: list, or list of dict containing generated text with probabilities and perplexity if specified and available
         '''
         input_context = None
-        
+        self.prediction_history = []
+
         # Catch input exceptions
         if not isinstance(text, str) and not isinstance(text, list) and not isinstance(text, pd.Series):
             raise TypeError('Input text needs to be of type: string, list or pandas.series')
@@ -180,8 +185,11 @@ class HuggingFaceModelPack:
         if isinstance(text, list):
             if len(text) == 0:
                 raise ValueError('Input text list cannot be empty')
-        if not isinstance(prompt_modifier, list):
-            raise TypeError('Input prompt modifier needs to be of type: list')
+        if prompt_modifier is None:
+            prompt_modifier = self._init_prompt()
+        else:
+            if not isinstance(prompt_modifier, list):
+                raise TypeError('Input prompt modifier needs to be of type: list')
         
         # Run prediction on text samples
         prediction = []
@@ -198,7 +206,10 @@ class HuggingFaceModelPack:
                 # Set the query text to previous output to carry on the prompt loop
                 if count > 0:
                     context = output_context['text']
-                context = f"{mod['prepend']} \n {context} \n {mod['append']}"
+                if mod['transform'] is not None and callable(mod['transform']):
+                    context = f"{mod['prepend']}\n{mod['transform'](context)}\n{mod['append']}"
+                else:
+                    context = f"{mod['prepend']}\n{context}\n{mod['append']}"
 
                 # Call model for text generation
                 output_context = self._predict(context, max_length=max_length, skip_special_tokens=skip_special_tokens,
@@ -217,8 +228,8 @@ class HuggingFaceModelPack:
             
             try:
                 if keep_history:
-                    prediction.append(history[-1]) # get last prediction output
-                    self.prediction_history.append(history) # get all historical prediction output
+                    prediction.append(history[-1]) # saves last prediction output
+                    self.prediction_history.append(history) # saves all historical prediction output
                 else:
                     prediction.append(history[-1])
             except:
