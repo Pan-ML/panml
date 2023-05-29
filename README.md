@@ -10,15 +10,17 @@ This package aims to make analysis and experimentation of generative AI/ML model
 We are passionate about AI technology and AI safety, and this supports our contribution towards a beneficial outcome in an AI-powered world. Please note this is a work in progress, so very much open for collaboration and contribution. 
 
 ### What this library covers
-- [Inference use-cases and analysis of LLM](https://github.com/Pan-ML/panml/wiki/5.-Generative-model-analysis)
+- [Inference and analysis of LLM](https://github.com/Pan-ML/panml/wiki/5.-Generative-model-analysis)
 - [Fine tuning of LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM)
 - [Prompt chain engineering a LLM](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering)
+- [Document question answering using LLM](https://github.com/Pan-ML/panml/wiki/7.-Retrieve-similar-documents-using-vector-search)
 - [Variable integrated code generation using LLM](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation)
-- [Document search and retrieval using LLM](https://github.com/Pan-ML/panml/wiki/7.-Retrieve-similar-documents-using-vector-search)
 
-### Current supported foundation models (see [complete list](https://github.com/Pan-ML/panml/wiki/8.-Supported-models))
+### Current supported foundation models
 - [HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others
 - [OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5
+
+See model options in [library supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models)
 
 ### Roadmap
 
@@ -62,6 +64,7 @@ import pandas as pd
 ```
 
 ### Using open source models from HuggingFace Hub
+See model options in [library supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models).
 ```python
 lm = ModelPack(model='gpt2', source='huggingface')
 
@@ -73,13 +76,13 @@ print(output['text'])
 ```
 Run inference on batch of inputs in dataframe
 ```python
-df_test = pd.DataFrame({'prompts': [
+df = pd.DataFrame({'input_prompts': [
     'The goal of life is',
     'The goal of work is',
     'The goal of leisure is',
 ]})
 
-output = lm.predict(df_test['prompts'], max_length=20)
+output = lm.predict(df['input_prompts'], max_length=20)
 ```
 ```
 ['The goal of life is to be a',
@@ -96,13 +99,13 @@ df_output = pd.DataFrame(output) # df_output contains columns: text, probability
 ```python
 lm = ModelPack(model='text-davinci-003', source='openai', api_key=<your_openai_key>)
 
-df_test = pd.DataFrame({'prompts': [
+df = pd.DataFrame({'input_prompts': [
     'The goal of life is',
     'The goal of work is',
     'The goal of leisure is',
 ]})
 
-output = lm.predict(df_test['prompts'])
+output = lm.predict(df['input_prompts'])
 ```
 ```
 [' to live a life of purpose, joy, and fulfillment. To find meaning and purpose in life, it is important to focus on what brings you joy and fulfillment, and to strive to make a positive impact on the world. It is also important to take care of yourself and your relationships, and to be mindful of the choices you make. ',
@@ -111,11 +114,14 @@ output = lm.predict(df_test['prompts'])
 ```
 
 ### Fine tune custom LLM
-For detailed examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM).
+For detailed examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM). 
 ```python
+# Load model
+lm = ModelPack(model='google/flan-t5-base', source='huggingface', model_args={'gpu': True})
+
 # Specify train args
 train_args = {
-    'title': 'my_tuned_gpt2',
+    'title': 'my_tuned_flan_t5',
     'num_train_epochs' : 1,
     'mlm': False,
     'optimizer': 'adamw_torch',
@@ -130,16 +136,16 @@ train_args = {
 }
 
 # Prepare data
-x = df['some_text']
-y = x
+x = df['input_text']
+y = df['target_text']
 
 # Train model
-lm.fit(x, y, train_args, instruct=False)
+lm.fit(x, y, train_args, instruct=True)
 ```
 
 ### Prompt chain engineering
+For detailed examples, see [prompt chain engineering](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering). <br>
 Create model pack from OpenAI model description and API key.
-For detailed examples, see [prompt chain engineering](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering).
 ```python
 lm = ModelPack(model='text-davinci-002', source='openai', api_key=<your_openai_key>)
 

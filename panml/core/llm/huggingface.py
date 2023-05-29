@@ -202,6 +202,8 @@ class HuggingFaceModelPack:
                     mod['prepend'] = ''
                 if 'append' not in mod:
                     mod['append'] = ''
+                if 'transform' not in mod:
+                    mod['transform'] = None
 
                 # Set the query text to previous output to carry on the prompt loop
                 if count > 0:
