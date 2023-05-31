@@ -108,6 +108,7 @@ df = pd.DataFrame({'input_prompts': [
 ]})
 
 output = lm.predict(df['input_prompts'])
+print(output)
 ```
 ```
 [' to live a life of purpose, joy, and fulfillment. To find meaning and purpose in life, it is important to focus on what brings you joy and fulfillment, and to strive to make a positive impact on the world. It is also important to take care of yourself and your relationships, and to be mindful of the choices you make. ',
@@ -129,7 +130,7 @@ prompts = [
 ]
 
 output = lm.predict('What is the best way to live a healthy lifestyle?', prompt_modifier=prompts, max_tokens=600)
-output['text']
+print(output['text'])
 ```
 ```
 'Assuming you are starting from a sedentary lifestyle, a good goal to aim for is 
