@@ -11,8 +11,8 @@ We are passionate about AI technology and AI safety, and this supports our contr
 
 ### What this library covers
 - [Inference and analysis of LLM](https://github.com/Pan-ML/panml/wiki/5.-Generative-model-analysis)
-- [Fine tuning of LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM)
 - [Prompt chain engineering a LLM](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering)
+- [Fine tuning of LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM)
 - [Document question answering using LLM](https://github.com/Pan-ML/panml/wiki/7.-Retrieve-similar-documents-using-vector-search)
 - [Variable integrated code generation using LLM](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation)
 
@@ -115,50 +115,6 @@ output = lm.predict(df['input_prompts'])
  ' to provide an enjoyable and fulfilling experience that helps to reduce stress, improve physical and mental health, and promote social interaction. Leisure activities can include anything from physical activities such as sports and outdoor recreation, to creative activities such as art and music, to social activities such as attending events or visiting friends. ']
 ```
 
-### Fine tune custom LLM
-For detailed examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM). <br><br>
-Demonstration example:
-```python
-# Load model
-lm = ModelPack(model='google/flan-t5-base', source='huggingface', model_args={'gpu': True})
-
-# Specify train args
-train_args = {
-    'title': 'my_tuned_flan_t5',
-    'num_train_epochs' : 1,
-    'mlm': False,
-    'optimizer': 'adamw_torch',
-    'per_device_train_batch_size': 10,
-    'per_device_eval_batch_size': 10,
-    'warmup_steps': 20,
-    'weight_decay': 0.01,
-    'logging_steps': 10,
-    'output_dir': './results',
-    'logging_dir': './logs',
-    'save_model': True,
-}
-
-# Prepare data
-x = df['input_text']
-y = df['target_text']
-
-# Train model
-lm.fit(x, y, train_args, instruct=True)
-```
-In above example, the tuned model is saved in the local directory: *./results/model_my_tuned_flan_t5* <br><br>
-Loading the model from local directory:
-```python
-lm = ModelPack(model='./results/model_my_tuned_flan_t5', source='local)
-```
-Saving the model to local directory:
-```python
-# Specify save directory
-lm.save(save_dir='./my_new_model')
-
-# Or if save directory is not provided, the default directory is: "./results/model_<model name>"
-lm.save()
-```
-
 ### Prompt chain engineering
 For detailed examples, see [prompt chain engineering](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering). <br><br>
 Create model pack from OpenAI model description and API key. <br>
@@ -181,13 +137,7 @@ output['text']
 This could include brisk walking, biking, swimming, or using a elliptical trainer. 
 Start with whatever you feel comfortable with and gradually increase your time and intensity as you get more fit. 
 Remember to warm up and cool down for 5-10 minutes before and after your workout. 
-In addition to aerobic exercise, it is also important to include strength training in your routine. 
-Strength-training not only helps to tone your body, but can also help to reduce your risk of injuries in the future. 
-A simple way to start strength-training is to use your own body weight for resistance. 
-Try doing push-ups, sit-ups, and squats. As you get stronger, you can add weight by using dumbbells or resistance bands. 
-Aim for two to three days of strength-training per week. 
-Finally, be sure to get enough sleep each night. Most adults need 7-8 hours of sleep per night. 
-Getting enough sleep will help your body to recover from your workouts and will also help to reduce stress levels.'
+In addition to aerobic exercise, it is also important to include strength training ...'
 ```
 Furthermore, if we want to apply more complex text or NLP treatments in our prompt chain pipeline, whether it is for steering the LLM's behaviour, and/or to apply constraints in the output for quality or risk control, we can write custom Python functions and use them in the prompt pipeline. <br><br> To demonstrate this, we use a simple example where we want to detect certain keywords in the LLM output, and then direct the LLM to refuse the answer if any of the specified keywords are caught.
 ```python3
@@ -255,6 +205,50 @@ and don’t give up. Find ways to stay motivated and reward yourself for your pr
 
 'I'm sorry, I can't answer that.'
 
+```
+
+### Fine tune custom LLM
+For detailed examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM). <br><br>
+Demonstration example:
+```python
+# Load model
+lm = ModelPack(model='google/flan-t5-base', source='huggingface', model_args={'gpu': True})
+
+# Specify train args
+train_args = {
+    'title': 'my_tuned_flan_t5',
+    'num_train_epochs' : 1,
+    'mlm': False,
+    'optimizer': 'adamw_torch',
+    'per_device_train_batch_size': 10,
+    'per_device_eval_batch_size': 10,
+    'warmup_steps': 20,
+    'weight_decay': 0.01,
+    'logging_steps': 10,
+    'output_dir': './results',
+    'logging_dir': './logs',
+    'save_model': True,
+}
+
+# Prepare data
+x = df['input_text']
+y = df['target_text']
+
+# Train model
+lm.fit(x, y, train_args, instruct=True)
+```
+In above example, the tuned model is saved in the local directory: *./results/model_my_tuned_flan_t5* <br><br>
+Loading the model from local directory:
+```python
+lm = ModelPack(model='./results/model_my_tuned_flan_t5', source='local)
+```
+Saving the model to local directory:
+```python
+# Specify save directory
+lm.save(save_dir='./my_new_model')
+
+# Or if save directory is not provided, the default directory is: "./results/model_<model name>"
+lm.save()
 ```
 
 ### Prompted code generation
