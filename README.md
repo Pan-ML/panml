@@ -140,7 +140,7 @@ Start with whatever you feel comfortable with and gradually increase your time a
 Remember to warm up and cool down for 5-10 minutes before and after your workout. 
 In addition to aerobic exercise, it is also important to include strength training ...'
 ```
-Furthermore, if we want to apply more complex text or NLP treatments in our prompt chain pipeline, whether it is for steering the LLM's behaviour, and/or to apply constraints in the output for quality or risk control, we can write custom Python functions and use them in the prompt pipeline. <br><br> To demonstrate this, we use a simple example where we want to detect certain keywords in the LLM output, and then direct the LLM to refuse the answer if any of the specified keywords are caught.
+Furthermore, if we want to apply more complex text or NLP treatments in our prompt chain pipeline, whether it is for steering the LLM's behaviour, and/or to apply constraints in the output for quality or risk control, we can write custom Python functions and use them in the prompt pipeline. <br><br> To demonstrate this, we use a simple example where we want to detect certain keywords in the LLM output, and then direct the LLM to refuse answering if any of the specified keywords are caught.
 ```python3
 def my_keyword_filter(text):
     keywords_to_elaborate = ['cooking', 'lifestyle', 'health', 'well-being']
