@@ -11,8 +11,8 @@ We are passionate about AI technology and AI safety, and this supports our contr
 
 ### What this library covers
 - [Inference and analysis of LLM](https://github.com/Pan-ML/panml/wiki/5.-Generative-model-analysis)
-- [Fine tuning of LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM)
 - [Prompt chain engineering a LLM](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering)
+- [Fine tuning of LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM)
 - [Document question answering using LLM](https://github.com/Pan-ML/panml/wiki/7.-Retrieve-similar-documents-using-vector-search)
 - [Variable integrated code generation using LLM](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation)
 
@@ -45,6 +45,7 @@ We would also appreciate if you can give panml a ⭐ on GitHub, and if it adds v
 
 
 ## Installation
+Requirement: Python 3.7+
 ```bash
 pip install panml
 ```
@@ -96,6 +97,7 @@ df_output = pd.DataFrame(output) # df_output contains columns: text, probability
 ```
 
 ### Using open source models from OpenAI
+*Note: For information on obtaining the OpenAI API key. Please see [OpenAI documentation](https://platform.openai.com/)*
 ```python
 lm = ModelPack(model='text-davinci-003', source='openai', api_key=<your_openai_key>)
 
@@ -106,6 +108,7 @@ df = pd.DataFrame({'input_prompts': [
 ]})
 
 output = lm.predict(df['input_prompts'])
+print(output)
 ```
 ```
 [' to live a life of purpose, joy, and fulfillment. To find meaning and purpose in life, it is important to focus on what brings you joy and fulfillment, and to strive to make a positive impact on the world. It is also important to take care of yourself and your relationships, and to be mindful of the choices you make. ',
@@ -113,8 +116,101 @@ output = lm.predict(df['input_prompts'])
  ' to provide an enjoyable and fulfilling experience that helps to reduce stress, improve physical and mental health, and promote social interaction. Leisure activities can include anything from physical activities such as sports and outdoor recreation, to creative activities such as art and music, to social activities such as attending events or visiting friends. ']
 ```
 
+### Prompt chain engineering
+For detailed examples, see [prompt chain engineering](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering). <br><br>
+Create model pack from OpenAI model description and API key. <br>
+*Note: For information on obtaining the OpenAI API key. Please see [OpenAI documentation](https://platform.openai.com/)*
+```python
+lm = ModelPack(model='text-davinci-002', source='openai', api_key=<your_openai_key>)
+
+prompts = [
+    {'prepend': 'you are a sports coach'},
+    {'prepend': 'produce a daily exercise plan for one week'},
+    {'prepend': 'summarise to the original question'},
+]
+
+output = lm.predict('What is the best way to live a healthy lifestyle?', prompt_modifier=prompts, max_tokens=600)
+print(output['text'])
+```
+```
+'Assuming you are starting from a sedentary lifestyle, a good goal to aim for is 
+30 minutes of moderate-intensity exercise most days of the week. 
+This could include brisk walking, biking, swimming, or using a elliptical trainer. 
+Start with whatever you feel comfortable with and gradually increase your time and intensity as you get more fit. 
+Remember to warm up and cool down for 5-10 minutes before and after your workout. 
+In addition to aerobic exercise, it is also important to include strength training ...'
+```
+Furthermore, if we want to apply more complex text or NLP treatments in our prompt chain pipeline, whether it is for steering the LLM's behaviour, and/or to apply constraints in the output for quality or risk control, we can write custom Python functions and use them in the prompt pipeline. <br><br> To demonstrate this, we use a simple example where we want to detect certain keywords in the LLM output, and then direct the LLM to refuse answering if any of the specified keywords are caught.
+```python3
+def my_keyword_filter(text):
+    keywords_to_elaborate = ['cooking', 'lifestyle', 'health', 'well-being']
+    keywords_to_refuse = ['politic', 'election', 'hack']
+    text = text.lower()
+    elaborate = [word for word in keywords_to_elaborate if word in text]
+    refuse = [word for word in keywords_to_refuse if word in text]
+    
+    # Set responses based on keywords
+    if len(refuse) == 0:
+        if len(elaborate) > 0:
+            return f"Break into step by step details and explain in more than three sentences: {text}"
+        else:
+            return f"Explain: {text}"
+    else:
+        return "Produce response to politely say I can't answer"
+    
+prompts = [
+    {},
+    {'transform': my_keyword_filter},
+]
+```
+Then using the prompt pipeline in the LLM
+```python3
+lm = ModelPack(model='text-davinci-003', source='openai', api_key=<your_openai_key>)
+
+df = pd.DataFrame({'input_prompts': [
+    'What is the best way to cook steak?',
+    'How to create an exercise plan?',
+    'Who is going to win the US election?',
+    'How to hack a bank?'
+]})
+df['output'] = lm.predict(df['input_prompts'], prompt_modifier=prompts, keep_history=True, max_length=1000)
+```
+```
+Responses:
+
+'1. Preheat a heavy skillet or grill over high heat. 
+2. Season the steak with salt and pepper. 
+3. Add the steak to the hot pan and sear for 1-2 minutes per side. 
+4. Reduce the heat to medium-high and cook for an additional 3-4 minutes per side, or until the steak reaches the desired doneness. 
+5. Let the steak rest for 5 minutes before serving.  This combination of high heat and short cooking 
+time will ensure that the steak is cooked to perfection. The high heat will quickly sear the steak, 
+locking in the juices and flavor, while the short cooking time will prevent the steak from becoming overcooked. 
+The resting period will allow the steak to finish cooking and will also help to keep the steak juicy and tender.'
+
+'1. Set your goals: Before you start creating your exercise plan, it’s important to set your goals. 
+Think about what you want to achieve and why. Do you want to lose weight, build muscle, 
+or improve your overall fitness? Consider your current fitness level and any health conditions you may have. 
+2. Choose your exercises: Once you’ve set your goals, it’s time to choose the exercises that will help you reach them. 
+Consider the type of exercise you enjoy and the equipment you have available. 
+Research different exercises and create a plan that works for you. 
+3. Create a schedule: Now that you’ve chosen your exercises, 
+it’s time to create a schedule. Decide how often you’ll exercise and for how long. 
+Make sure to include rest days and plan for any potential obstacles. 
+4. Track your progress: As you work through your exercise plan, track your progress. 
+This will help you stay motivated and make adjustments as needed. Keep track of your workouts, how you feel, 
+and any changes in your body. 
+5. Stay consistent: Consistency is key when it comes to exercise. Make sure you stick to your plan 
+and don’t give up. Find ways to stay motivated and reward yourself for your progress.' 
+
+'I'm sorry, I can't answer that.'
+
+'I'm sorry, I can't answer that.'
+
+```
+
 ### Fine tune custom LLM
-For detailed examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM). 
+For detailed examples, see [fine tuning your LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM). <br><br>
+Demonstration example:
 ```python
 # Load model
 lm = ModelPack(model='google/flan-t5-base', source='huggingface', model_args={'gpu': True})
@@ -142,39 +238,23 @@ y = df['target_text']
 # Train model
 lm.fit(x, y, train_args, instruct=True)
 ```
-
-### Prompt chain engineering
-For detailed examples, see [prompt chain engineering](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering). <br>
-Create model pack from OpenAI model description and API key.
+In above example, the tuned model is saved in the local directory: *./results/model_my_tuned_flan_t5* <br><br>
+Loading the model from local directory:
 ```python
-lm = ModelPack(model='text-davinci-002', source='openai', api_key=<your_openai_key>)
-
-prompts = [
-    {'prepend': 'you are a sports coach'},
-    {'prepend': 'produce a daily exercise plan for one week'},
-    {'prepend': 'summarise to the original question'},
-]
-
-output = lm.predict('What is the best way to live a healthy lifestyle?', prompt_modifier=prompts, max_tokens=600)
-output['text']
+lm = ModelPack(model='./results/model_my_tuned_flan_t5', source='local)
 ```
-```
-'Assuming you are starting from a sedentary lifestyle, a good goal to aim for is 
-30 minutes of moderate-intensity exercise most days of the week. 
-This could include brisk walking, biking, swimming, or using a elliptical trainer. 
-Start with whatever you feel comfortable with and gradually increase your time and intensity as you get more fit. 
-Remember to warm up and cool down for 5-10 minutes before and after your workout. 
-In addition to aerobic exercise, it is also important to include strength training in your routine. 
-Strength-training not only helps to tone your body, but can also help to reduce your risk of injuries in the future. 
-A simple way to start strength-training is to use your own body weight for resistance. 
-Try doing push-ups, sit-ups, and squats. As you get stronger, you can add weight by using dumbbells or resistance bands. 
-Aim for two to three days of strength-training per week. 
-Finally, be sure to get enough sleep each night. Most adults need 7-8 hours of sleep per night. 
-Getting enough sleep will help your body to recover from your workouts and will also help to reduce stress levels.'
+Saving the model to local directory:
+```python
+# Specify save directory
+lm.save(save_dir='./my_new_model')
+
+# Or if save directory is not provided, the default directory is: "./results/model_<model name>"
+lm.save()
 ```
 
 ### Prompted code generation
-For detailed examples, see [prompted code generation](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation).
+For detailed examples, see [prompted code generation](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation). <br><br>
+Some open source and commercial LLMs are capable of generating code based on prompt instructions. Here, we explore an experimental use-case to have the LLM generate the code for us, while incorporating a custom variable (this variable can also be a pandas dataframe) into the result.
 ```python
 code = lm.predict_code('calculate the fibonacci sequence using input', x=19, 
                        variable_names={'output': 'ans'}, language='python')
