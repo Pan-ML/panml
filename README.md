@@ -160,7 +160,7 @@ lm.save()
 ```
 
 ### Prompt chain engineering
-For detailed examples, see [prompt chain engineering](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering). <br>
+For detailed examples, see [prompt chain engineering](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering). <br><br>
 Create model pack from OpenAI model description and API key. <br>
 *Note: For information on obtaining the OpenAI API key. Please see [OpenAI documentation](https://platform.openai.com/)*
 ```python
