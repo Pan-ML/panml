@@ -185,12 +185,13 @@ class HuggingFaceModelPack:
         if isinstance(text, list):
             if len(text) == 0:
                 raise ValueError('Input text list cannot be empty')
+            input_context = text
         if prompt_modifier is None:
             prompt_modifier = self._init_prompt()
         else:
             if not isinstance(prompt_modifier, list):
                 raise TypeError('Input prompt modifier needs to be of type: list')
-        
+
         # Run prediction on text samples
         prediction = []
         for context in input_context:

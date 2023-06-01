@@ -127,6 +127,7 @@ class OpenAIModelPack:
         if isinstance(text, list):
             if len(text) == 0:
                 raise ValueError('Input text list cannot be empty')
+            input_context = text
         if prompt_modifier is None:
             prompt_modifier = self._init_prompt()
         else:
