@@ -22,6 +22,8 @@ We are passionate about AI technology and AI safety, and this supports our contr
 
 See model options in [library supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models)
 
+For performance overview of open source LLMs (including models not currently covered in this library), you can find the information on the [HuggingFace Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard).
+
 ### Roadmap
 
 Model development and analysis
