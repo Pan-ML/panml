@@ -30,7 +30,7 @@ class HuggingFaceModelPack:
                                    'output_dir', 'logging_dir', 'save_model']
         
         # Get PEFT LoRA configuration from model args
-        peft_lora_args, load_peft_lora = {}, None, None
+        peft_lora_args, load_peft_lora = {}, None
         if 'peft_lora' in model_args:
             peft_lora_args = model_args.pop('peft_lora')
             if 'load' in peft_lora_args:
