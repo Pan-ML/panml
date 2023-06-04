@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
 [![](https://dcbadge.vercel.app/api/server/cCsaqv9KFf?compact=true&style=flat)](https://discord.gg/cCsaqv9KFf)
 
-A library with simple to use abstractions when working with LLMs inspired by the sckit-learn style API. <br>
+A library with simple to use abstractions when working with LLMs inspired by the scikit-learn style API. <br>
 🔍 Easily explore and experiment with commercial and open source LLMs, including ones that can be run on your local machine. <br>
 ⚡ Easily integrate language models of different sizes, including smaller, less compute heavy but still very useful LLMs in NLP-based Data Science contexts. <br>
 🚀 Support the development of LLM workflows with off-the-shelf or custom-built generative models. <br><br>
