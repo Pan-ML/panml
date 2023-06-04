@@ -5,7 +5,7 @@ from typing import Union, Callable
 from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer
 from transformers import TrainingArguments, Trainer, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
 from datasets import Dataset
-from peft import get_peft_config, get_peft_model, PeftModel, PeftConfig, LoraConfig, TaskType
+from peft import get_peft_model, PeftModel, PeftConfig, LoraConfig, TaskType
 from panml.constants import SUPPORTED_LLMS_PEFT_LORA
 
 # HuggingFace model class
