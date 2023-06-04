@@ -25,15 +25,20 @@ class HuggingFaceModelPack:
         self.supported_models_peft_lora = SUPPORTED_LLMS_PEFT_LORA
         self.peft_config = None
         
-        set_peft_lora, load_peft_lora = {}, None
+        # Get PEFT LoRA configuration from model args
+        peft_lora_args, load_peft_lora, peft_lora_task_type = {}, None, None
         if 'peft_lora' in model_args:
-            set_peft_lora = model_args.pop('peft_lora')
-            if 'load' in set_peft_lora:
-                load_peft_lora = set_peft_lora.pop('load')
+            peft_lora_args = model_args.pop('peft_lora')
+            if 'load' in peft_lora_args:
+                load_peft_lora = peft_lora_args.pop('load')
             else:
-                if not isinstance(set_peft_lora['load'], bool):
+                if not isinstance(peft_lora_args['load'], bool):
                     raise TypeError('Input model args, peft_lora, load needs to be of type: boolean')
+                
+            if 'task_type' in peft_lora_args:
+                _ = peft_lora_args.pop('task_type') # remove task_type from input args to avoid duplication
 
+        # Get CPU/GPU configuration from model args
         set_gpu = False
         if 'gpu' in model_args:
             if not isinstance(model_args['gpu'], bool):
@@ -97,12 +102,12 @@ class HuggingFaceModelPack:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
 
         # Apply LoRA config for training
-        if set_peft_lora is not None and load_peft_lora is False:
+        if peft_lora_args is not {} and load_peft_lora is False:
             if self.model_name in self.supported_models_peft_lora:
                 if 'flan' in self.model_name:
-                    self.peft_config = LoraConfig(task_type=TaskType['SEQ_2_SEQ_LM'], **set_peft_lora)
+                    self.peft_config = LoraConfig(task_type=TaskType['SEQ_2_SEQ_LM'], **peft_lora_args)
                 else:
-                    self.peft_config = LoraConfig(task_type=TaskType['CAUSAL_LM'], **set_peft_lora)
+                    self.peft_config = LoraConfig(task_type=TaskType['CAUSAL_LM'], **peft_lora_args)
                 
                 self.model_hf = get_peft_model(self.model_hf, self.peft_config)
                 
