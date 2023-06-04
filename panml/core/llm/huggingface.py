@@ -26,10 +26,11 @@ class HuggingFaceModelPack:
         self.peft_config = None
         
         set_peft_lora = None
+        load_peft_lora = None
         if 'peft_lora' in model_args:
             set_peft_lora = model_args.pop('peft_lora')
-            if 'load' not in set_peft_lora:
-                set_peft_lora['load'] = False
+            if 'load' in set_peft_lora:
+                load_peft_lora = set_peft_lora['load']
             else:
                 if not isinstance(set_peft_lora['load'], bool):
                     raise TypeError('Input model args, peft_lora, load needs to be of type: boolean')
@@ -86,7 +87,7 @@ class HuggingFaceModelPack:
                     self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
         
         # Set tokenizer
-        if set_peft_lora['load']:
+        if load_peft_lora:
             # Set LORA trained model's tokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(self.peft_config.base_model_name_or_path)
         else:
@@ -97,7 +98,7 @@ class HuggingFaceModelPack:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
 
         # Apply LORA config for training
-        if set_peft_lora is not None and set_peft_lora['load'] is False:
+        if set_peft_lora is not None and load_peft_lora is False:
             if self.model_name in self.supported_models_peft_lora:
                 if 'flan' in self.model_name:
                     self.peft_config = LoraConfig(task_type=TaskType['SEQ_2_SEQ_LM'], 
