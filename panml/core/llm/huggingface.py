@@ -24,6 +24,10 @@ class HuggingFaceModelPack:
         self.device = 'cpu'
         self.supported_models_peft_lora = SUPPORTED_LLMS_PEFT_LORA
         self.peft_config = None
+        self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
+                                   'per_device_train_batch_size', 'per_device_eval_batch_size',
+                                   'warmup_steps', 'weight_decay', 'logging_steps', 
+                                   'output_dir', 'logging_dir', 'save_model']
         
         # Get PEFT LoRA configuration from model args
         peft_lora_args, load_peft_lora, peft_lora_task_type = {}, None, None
@@ -55,12 +59,7 @@ class HuggingFaceModelPack:
                             print('CUDA (GPU support) is not available')
                     except:
                         print('CUDA (GPU support) is not available')
-
         print(f'Model processing is set on {self.device.upper()}')
-        self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
-                                   'per_device_train_batch_size', 'per_device_eval_batch_size',
-                                   'warmup_steps', 'weight_decay', 'logging_steps', 
-                                   'output_dir', 'logging_dir', 'save_model']
 
         # Set model
         if source == 'huggingface':
@@ -101,7 +100,7 @@ class HuggingFaceModelPack:
             else:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
 
-        # Apply LoRA config for training
+        # Set LoRA for training
         if peft_lora_args is not {} and load_peft_lora is False:
             if self.model_name in self.supported_models_peft_lora:
                 if 'flan' in self.model_name:
