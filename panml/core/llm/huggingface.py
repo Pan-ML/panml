@@ -33,7 +33,6 @@ class HuggingFaceModelPack:
             else:
                 if not isinstance(set_peft_lora['load'], bool):
                     raise TypeError('Input model args, peft_lora, load needs to be of type: boolean')
-                self.peft_config = PeftConfig.from_pretrained(self.model_name)
 
         set_gpu = False
         if 'gpu' in model_args:
@@ -68,7 +67,8 @@ class HuggingFaceModelPack:
                 self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
         elif source == 'local':
             if set_peft_lora['load']:
-                # Set lora trained model
+                # Set LORA trained model
+                self.peft_config = PeftConfig.from_pretrained(self.model_name)
                 if 'flan' in self.model_name:
                     self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
                 elif 'bert' in self.model_name:
@@ -77,7 +77,7 @@ class HuggingFaceModelPack:
                     self.model_hf = AutoModelForCausalLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
                 self.model_hf = PeftModel.from_pretrained(self.model_hf, self.peft_config)
             else:
-                # Set non-lora trained model
+                # Set non-LORA trained model
                 if 'flan' in self.model_name:
                     self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
                 elif 'bert' in self.model_name:
@@ -87,16 +87,16 @@ class HuggingFaceModelPack:
         
         # Set tokenizer
         if set_peft_lora['load']:
-            # Set lora trained model's tokenizer
+            # Set LORA trained model's tokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(self.peft_config.base_model_name_or_path)
         else:
-            # Set non-lora trained model's tokenizer
+            # Set non-LORA trained model's tokenizer
             if self.model_hf.config.tokenizer_class:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
             else:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
 
-        # Apply lora config for training
+        # Apply LORA config for training
         if set_peft_lora is not None and set_peft_lora['load'] is False:
             if self.model_name in self.supported_models_peft_lora:
                 if 'flan' in self.model_name:
