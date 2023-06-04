@@ -108,16 +108,16 @@ class HuggingFaceModelPack:
                                                   lora_dropout=set_peft_lora['lora_dropout'])
                     
                     self.model_hf = get_peft_model(self.model_hf, self.peft_config)
-                    print('PEFT LoRA applied:')
-                    self.model_hf.print_trainable_parameters()
                 else:
                     self.peft_config = LoraConfig(task_type=TaskType['CAUSAL_LM'], 
                                                   inference_mode=set_peft_lora['inference_mode'], 
                                                   r=set_peft_lora['r'], 
                                                   lora_alpha=set_peft_lora['lora_alpha'], 
                                                   lora_dropout=set_peft_lora['lora_dropout'])
+                print('PEFT LoRA configuration applied:')
+                self.model_hf.print_trainable_parameters()
             else:
-                print('PEFT LoRA config not set. Current supported models for LoRA are: ' + ' '.join([f"{m}" for m in self.supported_models_peft_lora]))
+                print('PEFT LoRA configuration not set. Current supported models for LoRA are: ' + ' '.join([f"{m}" for m in self.supported_models_peft_lora]))
 
         # Set model on GPU if available and specified
         self.model_hf.to(torch.device(self.device))
