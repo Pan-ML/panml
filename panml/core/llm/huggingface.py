@@ -25,12 +25,11 @@ class HuggingFaceModelPack:
         self.supported_models_peft_lora = SUPPORTED_LLMS_PEFT_LORA
         self.peft_config = None
         
-        set_peft_lora = None
-        load_peft_lora = None
+        set_peft_lora, load_peft_lora = {}, None
         if 'peft_lora' in model_args:
             set_peft_lora = model_args.pop('peft_lora')
             if 'load' in set_peft_lora:
-                load_peft_lora = set_peft_lora['load']
+                load_peft_lora = set_peft_lora.pop('load')
             else:
                 if not isinstance(set_peft_lora['load'], bool):
                     raise TypeError('Input model args, peft_lora, load needs to be of type: boolean')
@@ -67,7 +66,7 @@ class HuggingFaceModelPack:
             else:
                 self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
         elif source == 'local':
-            if set_peft_lora['load']:
+            if load_peft_lora:
                 # Set LoRA trained model
                 self.peft_config = PeftConfig.from_pretrained(self.model_name)
                 if 'flan' in self.model_name:
@@ -101,17 +100,9 @@ class HuggingFaceModelPack:
         if set_peft_lora is not None and load_peft_lora is False:
             if self.model_name in self.supported_models_peft_lora:
                 if 'flan' in self.model_name:
-                    self.peft_config = LoraConfig(task_type=TaskType['SEQ_2_SEQ_LM'], 
-                                                  inference_mode=set_peft_lora['inference_mode'], 
-                                                  r=set_peft_lora['r'], 
-                                                  lora_alpha=set_peft_lora['lora_alpha'], 
-                                                  lora_dropout=set_peft_lora['lora_dropout'])
+                    self.peft_config = LoraConfig(task_type=TaskType['SEQ_2_SEQ_LM'], **set_peft_lora)
                 else:
-                    self.peft_config = LoraConfig(task_type=TaskType['CAUSAL_LM'], 
-                                                  inference_mode=set_peft_lora['inference_mode'], 
-                                                  r=set_peft_lora['r'], 
-                                                  lora_alpha=set_peft_lora['lora_alpha'], 
-                                                  lora_dropout=set_peft_lora['lora_dropout'])
+                    self.peft_config = LoraConfig(task_type=TaskType['CAUSAL_LM'], **set_peft_lora)
                 
                 self.model_hf = get_peft_model(self.model_hf, self.peft_config)
                 
