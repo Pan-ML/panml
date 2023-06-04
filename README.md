@@ -3,11 +3,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
 [![](https://dcbadge.vercel.app/api/server/cCsaqv9KFf?compact=true&style=flat)](https://discord.gg/cCsaqv9KFf)
 
-## Goal
-This package aims to make analysis and experimentation of generative AI/ML models broadly accessible, by providing a simple and consistent interface to foundation models, and abstract methods to support some of the common use-cases. This includes using smaller, less compute heavy Open Source language models to support the various NLP-based Data Science workflows in the industry. Additionally, we want to empower Data Science projects with the tools to easily productionise custom-built generative models.
-
-
-We are passionate about AI technology and AI safety, and this supports our contribution towards a beneficial outcome in an AI-powered world. Please note this is a work in progress, so very much open for collaboration and contribution. 
+A library with simple to use abstractions when working with LLMs inspired by the sckit-learn style API. <br>
+🔍 Easily explore and experiment with commercial and open source LLMs, including ones that can be run on your local machine. <br>
+⚡ Easily integrate language models of different sizes, including smaller, less compute heavy but still very useful LLMs in NLP-based Data Science contexts. <br>
+🚀 Support the development of LLM workflows with off-the-shelf or custom-built generative models. <br><br>
+Please note this is a work in progress, and it's open for collabration and contribution.
 
 ### What this library covers
 - [Inference and analysis of LLM](https://github.com/Pan-ML/panml/wiki/5.-Generative-model-analysis)
@@ -23,21 +23,6 @@ We are passionate about AI technology and AI safety, and this supports our contr
 See model options in [library supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models)
 
 For performance overview of open source LLMs (including models not currently covered in this library), you can find the information on the [HuggingFace Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard).
-
-### Roadmap
-
-Model development and analysis
-- Support for additional open source and commercial language model
-- Model evaluation methods (including adversarial evaluation)
-- Prompt engineering support and analysis (adding further methods and adding support for more LLMs)
-- Parameter-efficient fine tuning (e.g. LoRA, prompt tuning etc)
-- Model intepretability methods
-- Model emergent effect simulation and analysis (related to long term AI safety risks)
-
-Model productionisation
-- Automated refactoring of experimental code into source code
-- Automated API wrapper generation
-- Automated dockerization
 
 ### Support
 
@@ -307,3 +292,18 @@ pip install -r requirements.txt
 ```
 python3 -m unittest
 ```
+
+### Roadmap
+
+Model development and analysis
+- Support for additional open source and commercial language model
+- Model evaluation methods (including adversarial evaluation)
+- Prompt engineering support and analysis (adding further methods and adding support for more LLMs)
+- Parameter-efficient fine tuning (e.g. LoRA, prompt tuning etc)
+- Model intepretability methods
+- Model emergent effect simulation and analysis (related to long term AI safety risks)
+
+Model productionisation
+- Automated refactoring of experimental code into source code
+- Automated API wrapper generation
+- Automated dockerization
