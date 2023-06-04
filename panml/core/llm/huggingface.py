@@ -106,14 +106,15 @@ class HuggingFaceModelPack:
                                                   r=set_peft_lora['r'], 
                                                   lora_alpha=set_peft_lora['lora_alpha'], 
                                                   lora_dropout=set_peft_lora['lora_dropout'])
-                    
-                    self.model_hf = get_peft_model(self.model_hf, self.peft_config)
                 else:
                     self.peft_config = LoraConfig(task_type=TaskType['CAUSAL_LM'], 
                                                   inference_mode=set_peft_lora['inference_mode'], 
                                                   r=set_peft_lora['r'], 
                                                   lora_alpha=set_peft_lora['lora_alpha'], 
                                                   lora_dropout=set_peft_lora['lora_dropout'])
+                
+                self.model_hf = get_peft_model(self.model_hf, self.peft_config)
+                
                 print('PEFT LoRA configuration applied:')
                 self.model_hf.print_trainable_parameters()
             else:

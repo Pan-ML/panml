@@ -16,7 +16,7 @@ class ModelPack:
     Main model pack class
     '''
     def __init__(self, model: str, tokenizer: AutoTokenizer=None, input_block_size: int=20, padding_length: int=100, 
-                 tokenizer_batch: bool=False, source: str='huggingface', api_key: str=None, model_args={}) -> None:
+                 tokenizer_batch: bool=False, source: str='huggingface', api_key: str=None, model_args: dict={}) -> None:
         self.padding_length = padding_length
         self.tokenizer = tokenizer
         self.model = model
