@@ -68,7 +68,7 @@ class HuggingFaceModelPack:
                 self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
         elif source == 'local':
             if set_peft_lora['load']:
-                # Set LORA trained model
+                # Set LoRA trained model
                 self.peft_config = PeftConfig.from_pretrained(self.model_name)
                 if 'flan' in self.model_name:
                     self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
@@ -78,7 +78,7 @@ class HuggingFaceModelPack:
                     self.model_hf = AutoModelForCausalLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
                 self.model_hf = PeftModel.from_pretrained(self.model_hf, self.peft_config)
             else:
-                # Set non-LORA trained model
+                # Set non-LoRA trained model
                 if 'flan' in self.model_name:
                     self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
                 elif 'bert' in self.model_name:
@@ -88,16 +88,16 @@ class HuggingFaceModelPack:
         
         # Set tokenizer
         if load_peft_lora:
-            # Set LORA trained model's tokenizer
+            # Set LoRA trained model's tokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(self.peft_config.base_model_name_or_path)
         else:
-            # Set non-LORA trained model's tokenizer
+            # Set non-LoRA trained model's tokenizer
             if self.model_hf.config.tokenizer_class:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
             else:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
 
-        # Apply LORA config for training
+        # Apply LoRA config for training
         if set_peft_lora is not None and load_peft_lora is False:
             if self.model_name in self.supported_models_peft_lora:
                 if 'flan' in self.model_name:
@@ -108,7 +108,7 @@ class HuggingFaceModelPack:
                                                   lora_dropout=set_peft_lora['lora_dropout'])
                     
                     self.model_hf = get_peft_model(self.model_hf, self.peft_config)
-                    print('PEFT LORA applied:')
+                    print('PEFT LoRA applied:')
                     self.model_hf.print_trainable_parameters()
                 else:
                     self.peft_config = LoraConfig(task_type=TaskType['CAUSAL_LM'], 
@@ -117,7 +117,7 @@ class HuggingFaceModelPack:
                                                   lora_alpha=set_peft_lora['lora_alpha'], 
                                                   lora_dropout=set_peft_lora['lora_dropout'])
             else:
-                print('PEFT LORA not set. Current supported models for LORA are: ' + ' '.join([f"{m}" for m in self.supported_models_peft_lora]))
+                print('PEFT LoRA config not set. Current supported models for LoRA are: ' + ' '.join([f"{m}" for m in self.supported_models_peft_lora]))
 
         # Set model on GPU if available and specified
         self.model_hf.to(torch.device(self.device))
