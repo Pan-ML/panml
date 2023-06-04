@@ -36,7 +36,7 @@ class HuggingFaceModelPack:
             if 'load' in peft_lora_args:
                 load_peft_lora = peft_lora_args.pop('load')
             else:
-                if not isinstance(peft_lora_args['load'], bool):
+                if not isinstance(load_peft_lora, bool):
                     raise TypeError('Input model args, peft_lora, load needs to be of type: boolean')
                 
             if 'task_type' in peft_lora_args:
