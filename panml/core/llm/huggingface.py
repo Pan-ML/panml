@@ -5,6 +5,8 @@ from typing import Union, Callable
 from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer
 from transformers import TrainingArguments, Trainer, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
 from datasets import Dataset
+from peft import get_peft_model, PeftModel, PeftConfig, LoraConfig, TaskType
+from panml.constants import SUPPORTED_LLMS_PEFT_LORA
 
 # HuggingFace model class
 class HuggingFaceModelPack:
@@ -20,7 +22,28 @@ class HuggingFaceModelPack:
         self.prediction_history = []
         self.evaluation_result = None
         self.device = 'cpu'
+        self.supported_models_peft_lora = SUPPORTED_LLMS_PEFT_LORA
+        self.peft_config = None
+        self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
+                                   'per_device_train_batch_size', 'per_device_eval_batch_size',
+                                   'warmup_steps', 'weight_decay', 'logging_steps', 
+                                   'output_dir', 'logging_dir', 'save_model']
         
+        # Get PEFT LoRA configuration from model args
+        peft_lora_args, load_peft_lora = {}, None
+        if 'peft_lora' in model_args:
+            peft_lora_args = model_args.pop('peft_lora')
+            if 'load' in peft_lora_args:
+                load_peft_lora = peft_lora_args.pop('load')
+            else:
+                if not isinstance(load_peft_lora, bool):
+                    raise TypeError('Input model args, peft_lora, load needs to be of type: boolean')
+                
+            if 'task_type' in peft_lora_args:
+                _ = peft_lora_args.pop('task_type') # remove task_type from input args to avoid duplication
+
+        # Get CPU/GPU configuration from model args
+        set_gpu = False
         if 'gpu' in model_args:
             if not isinstance(model_args['gpu'], bool):
                 raise TypeError('Input model args, gpu needs to be of type: boolean')
@@ -36,13 +59,9 @@ class HuggingFaceModelPack:
                             print('CUDA (GPU support) is not available')
                     except:
                         print('CUDA (GPU support) is not available')
-
         print(f'Model processing is set on {self.device.upper()}')
-        self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
-                                   'per_device_train_batch_size', 'per_device_eval_batch_size',
-                                   'warmup_steps', 'weight_decay', 'logging_steps', 
-                                   'output_dir', 'logging_dir', 'save_model']
 
+        # Set model
         if source == 'huggingface':
             if 'flan' in self.model_name:
                 self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args)
@@ -51,16 +70,50 @@ class HuggingFaceModelPack:
             else:
                 self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
         elif source == 'local':
-            if 'flan' in self.model_name:
-                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
-            elif 'bert' in self.model_name:
-                self.model_hf = AutoModelForMaskedLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+            if load_peft_lora:
+                # Set LoRA trained model
+                self.peft_config = PeftConfig.from_pretrained(self.model_name)
+                if 'flan' in self.model_name:
+                    self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
+                elif 'bert' in self.model_name:
+                    self.model_hf = AutoModelForMaskedLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
+                else:
+                    self.model_hf = AutoModelForCausalLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
+                self.model_hf = PeftModel.from_pretrained(self.model_hf, self.peft_config)
             else:
-                self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
-        if self.model_hf.config.tokenizer_class:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
+                # Set non-LoRA trained model
+                if 'flan' in self.model_name:
+                    self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+                elif 'bert' in self.model_name:
+                    self.model_hf = AutoModelForMaskedLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+                else:
+                    self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+        
+        # Set tokenizer
+        if load_peft_lora:
+            # Set LoRA trained model's tokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained(self.peft_config.base_model_name_or_path)
         else:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
+            # Set non-LoRA trained model's tokenizer
+            if self.model_hf.config.tokenizer_class:
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
+            else:
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
+
+        # Set LoRA for training
+        if peft_lora_args is not {} and load_peft_lora is False:
+            if self.model_name in self.supported_models_peft_lora:
+                if 'flan' in self.model_name:
+                    self.peft_config = LoraConfig(task_type=TaskType['SEQ_2_SEQ_LM'], **peft_lora_args)
+                else:
+                    self.peft_config = LoraConfig(task_type=TaskType['CAUSAL_LM'], **peft_lora_args)
+                
+                self.model_hf = get_peft_model(self.model_hf, self.peft_config)
+                
+                print('PEFT LoRA configuration applied:')
+                self.model_hf.print_trainable_parameters()
+            else:
+                print('PEFT LoRA configuration not set. Current supported models for LoRA are: ' + ' '.join([f"{m}" for m in self.supported_models_peft_lora]))
 
         # Set model on GPU if available and specified
         self.model_hf.to(torch.device(self.device))

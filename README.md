@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
 [![](https://dcbadge.vercel.app/api/server/cCsaqv9KFf?compact=true&style=flat)](https://discord.gg/cCsaqv9KFf)
 
-A library with simple to use abstractions when working with LLMs inspired by the sckit-learn style API. <br>
+A library with simple-to-use abstractions when working with LLMs, inspired by the scikit-learn style API. <br>
 🔍 Easily explore and experiment with commercial and open source LLMs, including ones that can be run on your local machine. <br>
 ⚡ Easily integrate language models of different sizes, including smaller, less compute heavy but still very useful LLMs in NLP-based Data Science contexts. <br>
 🚀 Support the development of LLM workflows with off-the-shelf or custom-built generative models. <br><br>
@@ -11,7 +11,7 @@ Please note this is a work in progress, and it's open for collabration and contr
 
 ### What this library covers
 - [Inference and analysis of LLM](https://github.com/Pan-ML/panml/wiki/5.-Generative-model-analysis)
-- [Prompt chain engineering a LLM](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering)
+- [Prompt chain engineering with LLM](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering)
 - [Fine tuning of LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM)
 - [Document question answering using LLM](https://github.com/Pan-ML/panml/wiki/7.-Retrieve-similar-documents-using-vector-search)
 - [Variable integrated code generation using LLM](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation)

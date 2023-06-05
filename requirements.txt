@@ -9,3 +9,4 @@ torch==2.0.0
 faiss-cpu==1.7.4
 sentence-transformers==2.2.2
 accelerate==0.19.0
+peft==0.3.0

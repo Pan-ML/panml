@@ -21,7 +21,10 @@ SUPPORTED_LLMS = {
         'cerebras/Cerebras-GPT-2.7B',
         'cerebras/Cerebras-GPT-6.7B',
         'cerebras/Cerebras-GPT-13B',
+        'EleutherAI/gpt-neo-125m',
+        'EleutherAI/gpt-neo-1.3B',
         'EleutherAI/gpt-neo-2.7B',
+        'EleutherAI/gpt-neox-20b',
         'EleutherAI/gpt-j-6B',
         'togethercomputer/GPT-JT-6B-v1',
         'togethercomputer/GPT-NeoXT-Chat-Base-20B',
@@ -45,6 +48,12 @@ SUPPORTED_LLMS = {
         'tiiuae/falcon-7b-instruct',
         'tiiuae/falcon-40b',
         'tiiuae/falcon-40b-instruct',
+        'bigscience/bloomz-560m',
+        'bigscience/bloomz-1b1',
+        'bigscience/bloomz-1b7',
+        'bigscience/bloomz-3b',
+        'bigscience/bloomz-7b1',
+        'bigscience/bloomz',
     ],
     'openai': [
         'text-davinci-002', 
@@ -53,6 +62,29 @@ SUPPORTED_LLMS = {
         'gpt-3.5-turbo-0301',
     ],
 }
+
+SUPPORTED_LLMS_PEFT_LORA = [
+    'gpt2',
+    'gpt2-medium',
+    'gpt2-xl',
+    'google/flan-t5-base',
+    'google/flan-t5-small',
+    'google/flan-t5-large',
+    'google/flan-t5-xl',
+    'google/flan-t5-xxl',
+    'EleutherAI/gpt-neo-125m',
+    'EleutherAI/gpt-neo-1.3B',
+    'EleutherAI/gpt-neo-2.7B',
+    'EleutherAI/gpt-neo-2.7B',
+    'EleutherAI/gpt-j-6B',
+    'togethercomputer/GPT-NeoXT-Chat-Base-20B',
+    'bigscience/bloomz-560m',
+    'bigscience/bloomz-1b1',
+    'bigscience/bloomz-1b7',
+    'bigscience/bloomz-3b',
+    'bigscience/bloomz-7b1',
+    'bigscience/bloomz',
+]
 
 # Supported OpenAI models for code completion
 SUPPORTED_OAI_CODE_MODELS = [
