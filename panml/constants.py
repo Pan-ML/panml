@@ -169,3 +169,26 @@ INTERROGATE_PROMPT = [
     {"append": "Explain why this is true: "},
     {"append": "Explain why this is true: "},
 ]
+
+# HuggingFace tokenizer arguments default
+TOKENIZER_ARGS_DEFAULT = {
+    'input_block_size': 20,
+    'padding_length': 100,
+    'tokenizer_batch': False,
+}
+
+# HuggingFace trainer arguments
+TRAINER_ARGS = [
+    'title', 
+    'num_train_epochs', 
+    'optimizer', 
+    'mlm', 
+    'per_device_train_batch_size', 
+    'per_device_eval_batch_size',
+    'warmup_steps', 
+    'weight_decay', 
+    'logging_steps', 
+    'output_dir', 
+    'logging_dir', 
+    'save_model'
+]

@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from typing import Union
 
 # Dependencies for vector search
-from panml.core.clustering.faiss import FAISSVectorEngine
+from panml.clustering.faiss import FAISSVectorEngine
 from panml.constants import SUPPORTED_VECTOR_SEARCH_SOURCES, SUPPORTED_EMBEDDING_MODELS
 
 # Entry vector engine class           
