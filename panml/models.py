@@ -45,7 +45,7 @@ class ModelPack:
         # OpenAI model call
         elif self.source == 'openai':
             if self.model not in self.supported_models['openai']:
-                raise ValueError('The specified model currently is not supported in this pacckage. Supported OpenAI models are: ' + ' '.join([f"{m}" for m in self.supported_models['openai']]))
+                raise ValueError('The specified model currently is not supported in this package. Supported OpenAI models are: ' + ' '.join([f"{m}" for m in self.supported_models['openai']]))
             if self.api_key is None:
                 raise ValueError('api key has not been specified for OpenAI model call')
             self.instance = OpenAIModelPack(model=self.model, api_key=self.api_key)
