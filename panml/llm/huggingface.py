@@ -16,12 +16,12 @@ class HuggingFaceModelPack:
     # Initialize class variables
     def __init__(self, model: str, source: str, model_args: dict) -> None:
         self.model_name = model # model name
-        self.prediction_history = [] # model inference history
         self.trainer_args = TRAINER_ARGS # model trainer arguments
         self.supported_models_peft_lora = SUPPORTED_LLMS_PEFT_LORA # supported LLMs for LoRA implementation
         self.peft_config = None # PEFT LoRA configuration
         self.device = 'cpu' # model training and inference hardware setting
         self.evaluation_result = None # model training evaluation result
+        self.prediction_history = [] # model inference history in prompt loop
         
         # Get tokenizer arguments
         tokenzier_args = {k: model_args.pop(k) for k in list(TOKENIZER_DEFAULT_ARGS.keys()) if k in model_args}
@@ -225,7 +225,6 @@ class HuggingFaceModelPack:
         prediction: list, or list of dict containing generated text with probabilities and perplexity if specified and available
         '''
         input_context = None
-        self.prediction_history = []
 
         # Catch input exceptions
         if not isinstance(text, str) and not isinstance(text, list) and not isinstance(text, pd.Series):

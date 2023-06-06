@@ -12,12 +12,12 @@ class OpenAIModelPack:
     '''
     def __init__(self, model: str, api_key: str) -> None:
         self.model_name = model # model name
-        self.prediction_history = None # model prediction history
         self.model_embedding = SUPPORTED_EMBEDDING_MODELS['openai'] # model embedding name
         self.supported_code_models = SUPPORTED_OAI_CODE_MODELS # supported code models
         self.completion_models = SUPPORTED_OAI_COMPLETION_MODELS # supported completion models
         self.chat_completion_models = SUPPORTED_OAI_CHAT_MODELS # supported chat models
         openai.api_key = api_key # set api key
+        self.prediction_history = [] # model inference history in prompt loop
         
     def _init_prompt(self) -> list[dict[str, Union[str, Callable]]]:
         return [{'prepend': '', 'append': '', 'transform': None}]
