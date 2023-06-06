@@ -33,8 +33,6 @@ class HuggingFaceModelPack:
         
         # Get PEFT LoRA configuration from model args
         peft_lora_args, load_peft_lora = {}, False
-        for k in PEFT_LORA_DEFAULT_ARGS:
-            peft_lora_args.setdefault(k, PEFT_LORA_DEFAULT_ARGS[k])
         if 'peft_lora' in model_args:
             peft_lora_args = model_args.pop('peft_lora')
             if 'load' in peft_lora_args:
@@ -44,6 +42,9 @@ class HuggingFaceModelPack:
                     raise TypeError('Input model args, peft_lora, load needs to be of type: boolean')
             if 'task_type' in peft_lora_args:
                 _ = peft_lora_args.pop('task_type') # remove task_type from input args to avoid duplication
+
+            for k in PEFT_LORA_DEFAULT_ARGS:
+                peft_lora_args.setdefault(k, PEFT_LORA_DEFAULT_ARGS[k]) # set default arguments for LoRA
 
         # Get CPU/GPU configuration from model args
         set_gpu = False
@@ -104,7 +105,7 @@ class HuggingFaceModelPack:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
 
         # Set LoRA for training
-        if peft_lora_args is not {} and load_peft_lora is False:
+        if len(peft_lora_args) > 0 and load_peft_lora is False:
             if self.model_name in self.supported_models_peft_lora:
                 if 'flan' in self.model_name:
                     self.peft_config = LoraConfig(task_type=TaskType['SEQ_2_SEQ_LM'], **peft_lora_args)

@@ -165,6 +165,7 @@ TRAINER_ARGS = [
     'save_model'
 ]
 
+# HuggingFace LoRA arguments
 PEFT_LORA_DEFAULT_ARGS = {
     'inference_mode': False, 
     'r': 8, 
