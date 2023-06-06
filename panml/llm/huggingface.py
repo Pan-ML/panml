@@ -6,7 +6,7 @@ from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelF
 from transformers import TrainingArguments, Trainer, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
 from datasets import Dataset
 from peft import get_peft_model, PeftModel, PeftConfig, LoraConfig, TaskType
-from panml.constants import SUPPORTED_LLMS_PEFT_LORA, TOKENIZER_ARGS_DEFAULT, TRAINER_ARGS
+from panml.constants import SUPPORTED_LLMS_PEFT_LORA, TOKENIZER_DEFAULT_ARGS, TRAINER_ARGS, PEFT_LORA_DEFAULT_ARGS
 
 # HuggingFace model class
 class HuggingFaceModelPack:
@@ -24,15 +24,17 @@ class HuggingFaceModelPack:
         self.trainer_args = TRAINER_ARGS # Get trainer arguments
 
         # Get tokenizer arguments
-        tokenzier_args = {k: model_args.pop(k) for k in list(TOKENIZER_ARGS_DEFAULT.keys()) if k in model_args}
-        for k in TOKENIZER_ARGS_DEFAULT:
-            tokenzier_args.setdefault(k, TOKENIZER_ARGS_DEFAULT[k])
+        tokenzier_args = {k: model_args.pop(k) for k in list(TOKENIZER_DEFAULT_ARGS.keys()) if k in model_args}
+        for k in TOKENIZER_DEFAULT_ARGS:
+            tokenzier_args.setdefault(k, TOKENIZER_DEFAULT_ARGS[k])
         self.padding_length = tokenzier_args['padding_length']
         self.input_block_size = tokenzier_args['input_block_size']
         self.tokenizer_batch = tokenzier_args['tokenizer_batch']
         
         # Get PEFT LoRA configuration from model args
         peft_lora_args, load_peft_lora = {}, False
+        for k in PEFT_LORA_DEFAULT_ARGS:
+            peft_lora_args.setdefault(k, PEFT_LORA_DEFAULT_ARGS[k])
         if 'peft_lora' in model_args:
             peft_lora_args = model_args.pop('peft_lora')
             if 'load' in peft_lora_args:
