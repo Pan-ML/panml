@@ -14,7 +14,7 @@ class ModelPack:
     '''
     Main model pack class
     '''
-    def __init__(self, model: str, api_key: str=None, source: str='huggingface', model_args: dict={}) -> None:
+    def __init__(self, model: str, source: str='huggingface', model_args: dict={}, api_key: str=None) -> None:
         self.model = model
         self.source = source
         self.api_key = api_key
