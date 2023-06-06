@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 from typing import Union, Callable
 import openai
-from panml.constants import SUPPORTED_OAI_CODE_MODELS, SUPPORTED_OAI_COMPLETION_MODELS, SUPPORTED_OAI_CHAT_MODELS
+from panml.constants import SUPPORTED_OAI_CODE_MODELS, SUPPORTED_OAI_COMPLETION_MODELS, SUPPORTED_OAI_CHAT_MODELS, SUPPORTED_EMBEDDING_MODELS
 
 # OpenAI model class
 class OpenAIModelPack:
@@ -11,13 +11,13 @@ class OpenAIModelPack:
     OpenAI model pack class
     '''
     def __init__(self, model: str, api_key: str) -> None:
-        self.model_name = model
-        self.model_embedding = 'text-embedding-ada-002'
-        self.prediction_history = None
-        self.supported_code_models = SUPPORTED_OAI_CODE_MODELS
-        self.completion_models = SUPPORTED_OAI_COMPLETION_MODELS
-        self.chat_completion_models = SUPPORTED_OAI_CHAT_MODELS
-        openai.api_key = api_key
+        self.model_name = model # model name
+        self.prediction_history = None # model prediction history
+        self.model_embedding = SUPPORTED_EMBEDDING_MODELS['openai'] # model embedding name
+        self.supported_code_models = SUPPORTED_OAI_CODE_MODELS # supported code models
+        self.completion_models = SUPPORTED_OAI_COMPLETION_MODELS # supported completion models
+        self.chat_completion_models = SUPPORTED_OAI_CHAT_MODELS # supported chat models
+        openai.api_key = api_key # set api key
         
     def _init_prompt(self) -> list[dict[str, Union[str, Callable]]]:
         return [{'prepend': '', 'append': '', 'transform': None}]
