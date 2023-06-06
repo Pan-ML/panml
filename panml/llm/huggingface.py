@@ -111,10 +111,10 @@ class HuggingFaceModelPack:
                 
                 self.model_hf = get_peft_model(self.model_hf, self.peft_config)
                 
-                print('PEFT LoRA configuration applied:')
+                print('PEFT LoRA configuration is applied:')
                 self.model_hf.print_trainable_parameters()
             else:
-                print('PEFT LoRA configuration not set. Current supported models for LoRA are: ' + ' '.join([f"{m}" for m in self.supported_models_peft_lora]))
+                print('PEFT LoRA configuration is not set. Current supported models for LoRA are: ' + ' '.join([f"{m}" for m in self.supported_models_peft_lora]))
 
         # Set model on GPU if available and specified
         self.model_hf.to(torch.device(self.device))
