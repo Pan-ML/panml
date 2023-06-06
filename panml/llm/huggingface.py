@@ -32,7 +32,7 @@ class HuggingFaceModelPack:
         self.tokenizer_batch = tokenzier_args['tokenizer_batch']
         
         # Get PEFT LoRA configuration from model args
-        peft_lora_args, load_peft_lora = {}, None
+        peft_lora_args, load_peft_lora = {}, False
         if 'peft_lora' in model_args:
             peft_lora_args = model_args.pop('peft_lora')
             if 'load' in peft_lora_args:
