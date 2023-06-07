@@ -152,7 +152,7 @@ class OpenAIModelPack:
             raise TypeError('Input stream needs to be of type: boolean')
         else:
             if stream and not isinstance(text, str):
-                raise ValueError('Streaming is not available for inputs that are outside of the single string input use-case')
+                raise ValueError('Streaming is not available for inputs (e.g. list or pandas dataframe column) that are outside of the string input use-case')
             
         # Run prediction on text samples
         prediction = []
