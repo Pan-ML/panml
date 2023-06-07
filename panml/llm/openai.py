@@ -148,8 +148,11 @@ class OpenAIModelPack:
                 raise TypeError('Input prompt modifier needs to be of type: list')
         if not isinstance(chat_role, str):
             raise TypeError('Input chat role needs to be of type: string')
-        if stream and not isinstance(text, str):
-            raise ValueError('Streaming is not available for inputs that are outside of the single string input use-case')
+        if not isinstance(stream, bool):
+            raise TypeError('Input stream needs to be of type: boolean')
+        else:
+            if stream and not isinstance(text, str):
+                raise ValueError('Streaming is not available for inputs that are outside of the single string input use-case')
             
         # Run prediction on text samples
         prediction = []
