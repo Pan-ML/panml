@@ -54,6 +54,9 @@ SUPPORTED_LLMS = {
         'bigscience/bloomz-3b',
         'bigscience/bloomz-7b1',
         'bigscience/bloomz',
+        'databricks/dolly-v2-3b',
+        'databricks/dolly-v2-7b',
+        'databricks/dolly-v2-12b',
     ],
     'openai': [
         'text-davinci-002', 

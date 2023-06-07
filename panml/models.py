@@ -5,9 +5,9 @@ import torch
 from typing import Union
 
 # Dependencies for specialised language model implementations
-from panml.llm.huggingface import HuggingFaceModelPack
-from panml.llm.openai import OpenAIModelPack
-from panml.constants import SUPPORTED_LLMS, SUPPORTED_LLM_SOURCES
+from panml_test.panml.llm.huggingface import HuggingFaceModelPack
+from panml_test.panml.llm.openai import OpenAIModelPack
+from panml_test.panml.constants import SUPPORTED_LLMS, SUPPORTED_LLM_SOURCES
 
 # Entry model pack class           
 class ModelPack:
