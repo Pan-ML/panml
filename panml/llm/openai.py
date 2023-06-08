@@ -1,8 +1,8 @@
 from __future__ import annotations
-import pandas as pd
+import pandas
+import openai
 import torch
 from typing import Union, Callable
-import openai
 from panml.constants import SUPPORTED_OAI_CODE_MODELS, SUPPORTED_OAI_COMPLETION_MODELS, SUPPORTED_OAI_CHAT_MODELS, SUPPORTED_EMBEDDING_MODELS
 
 # OpenAI model class
@@ -98,7 +98,7 @@ class OpenAIModelPack:
         return output_context
     
     # Generate text in prompt loop
-    def predict(self, text: Union[str, list[str], pd.Series], temperature: float=0, max_length: int=100, top_p: float=1, n: int=3, 
+    def predict(self, text: Union[str, list[str], pandas.Series], temperature: float=0, max_length: int=100, top_p: float=1, n: int=3, 
                 frequency_penalty: float=0, presence_penalty: float=0, display_probability: bool=False, logprobs: int=1, 
                 prompt_modifier: list[dict[str, str]]=None, keep_history: bool=False, 
                 chat_role: str='user', stream: bool=False) -> Union[dict[str, str], list[str]]:
@@ -127,9 +127,9 @@ class OpenAIModelPack:
         self.prediction_history = []
 
         # Catch input exceptions
-        if not isinstance(text, str) and not isinstance(text, list) and not isinstance(text, pd.Series):
+        if not isinstance(text, str) and not isinstance(text, list) and not isinstance(text, pandas.Series):
             raise TypeError('Input text needs to be of type: string, list or pandas.series')
-        if isinstance(text, pd.Series): # convert to list from pandas series if available
+        if isinstance(text, pandas.Series): # convert to list from pandas series if available
             input_context = text.tolist()
             if len(input_context) == 0:
                 raise ValueError('Input text list cannot be empty')
@@ -221,7 +221,7 @@ class OpenAIModelPack:
                 return [pred.get('text', None) for pred in prediction] # return list as result
     
     # Generate and execute code using (LM powered function)
-    def predict_code(self, text: str, x: Union[int, float, str, pd.DataFrame], variable_names: dict[str, str]={'input': 'x', 'output': 'y'}, 
+    def predict_code(self, text: str, x: Union[int, float, str, pandas.DataFrame], variable_names: dict[str, str]={'input': 'x', 'output': 'y'}, 
                      language: str='python', max_tokens: int=500) -> str:
         '''
         Generates code output by prompting a language model from OpenAI with a constrained command that is specific for code generation.
@@ -242,7 +242,7 @@ class OpenAIModelPack:
         if not isinstance(text, str):
             raise TypeError('Input text needs to be of type: string')
         if not isinstance(x, int) and not isinstance(x, float) and \
-            not isinstance(x, str) and not isinstance(x, pd.DataFrame):
+            not isinstance(x, str) and not isinstance(x, pandas.DataFrame):
             raise TypeError('Input x needs to be of type: int, float, str or pandas dataframe')
         if not isinstance(variable_names, dict):
             raise TypeError('Input variable names needs to be of type: dict')
@@ -254,7 +254,7 @@ class OpenAIModelPack:
         
         # Prompt logic for code generation
         input_dataframe_col_names = ''
-        if isinstance(x, pd.DataFrame):
+        if isinstance(x, pandas.DataFrame):
             input_dataframe_col_names = f" dataframe has columns: {', '.join(x.columns.tolist())}"
             input_arg_context = f"{variable_names['output']} = None" # Set input and output variables
         else:

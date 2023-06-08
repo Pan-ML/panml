@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 # Dependencies for data processing and general machine learning implementations
-import numpy as np
-import pandas as pd
+import numpy
+import pandas
 from typing import Union
 
 # Dependencies for vector search
 import faiss
-from sentence_transformers import SentenceTransformer
+import sentence_transformers
 import openai
 import pickle
 
@@ -22,7 +22,7 @@ class FAISSVectorEngine:
         self.model = model
         self.model_emb_source = model_emb_source
         if self.model_emb_source == 'huggingface':
-            self.model_emb = SentenceTransformer(self.model) # Embedding model using HuggingFace sentence transformer
+            self.model_emb = sentence_transformers.SentenceTransformer(self.model) # Embedding model using HuggingFace sentence transformer
         elif self.model_emb_source == 'openai':
             self.model_emb = None # Embedding model not required with third party API functions
             if api_key is None:
@@ -37,12 +37,12 @@ class FAISSVectorEngine:
         text = text.replace('\n', ' ')
         return openai.Embedding.create(input=[text], model=model)['data'][0]['embedding']
     
-    def _get_embedding(self, corpus: list[str], model_emb_source: str) -> np.array:
+    def _get_embedding(self, corpus: list[str], model_emb_source: str) -> numpy.array:
         if model_emb_source == 'huggingface':
             return self.model_emb.encode(corpus)
         elif model_emb_source == 'openai':
-            df_corpus = pd.DataFrame({'corpus': corpus})
-            return np.array(df_corpus['corpus'].apply(lambda x: self._get_openai_embedding(x, model=self.model)).tolist())
+            df_corpus = pandas.DataFrame({'corpus': corpus})
+            return numpy.array(df_corpus['corpus'].apply(lambda x: self._get_openai_embedding(x, model=self.model)).tolist())
 
     # Store the corpus as vectors
     def store(self, corpus: list[str], model_name: str='stored', 
@@ -182,4 +182,4 @@ class FAISSVectorEngine:
             k = len(self.corpus) # cap the max k to the maximum number of documents in the corpus store
         query_vector = self._get_embedding([query], self.model_emb_source) # embed input vector
         D, I = self.vectors.search(query_vector, k) # perform vector search
-        return list(np.array(self.corpus)[I][0])
+        return list(numpy.array(self.corpus)[I][0])

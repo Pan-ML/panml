@@ -1,11 +1,10 @@
 from __future__ import annotations
-import pandas as pd
+import pandas
 import torch
+import transformers
+import datasets
+import peft
 from typing import Union, Callable
-from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer
-from transformers import TrainingArguments, Trainer, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
-from datasets import Dataset
-from peft import get_peft_model, PeftModel, PeftConfig, LoraConfig, TaskType
 from panml.constants import SUPPORTED_LLMS_PEFT_LORA, TOKENIZER_DEFAULT_ARGS, TRAINER_ARGS, PEFT_LORA_DEFAULT_ARGS
 
 # HuggingFace model class
@@ -68,51 +67,51 @@ class HuggingFaceModelPack:
         # Set model
         if source == 'huggingface':
             if 'flan' in self.model_name:
-                self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args)
+                self.model_hf = transformers.AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args)
             elif 'bert' in self.model_name:
-                self.model_hf = AutoModelForMaskedLM.from_pretrained(self.model_name, **model_args)
+                self.model_hf = transformers.AutoModelForMaskedLM.from_pretrained(self.model_name, **model_args)
             else:
-                self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
+                self.model_hf = transformers.AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
         elif source == 'local':
             if load_peft_lora:
                 # Set LoRA trained model
-                self.peft_config = PeftConfig.from_pretrained(self.model_name)
+                self.peft_config = peft.PeftConfig.from_pretrained(self.model_name)
                 if 'flan' in self.model_name:
-                    self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
+                    self.model_hf = transformers.AutoModelForSeq2SeqLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
                 elif 'bert' in self.model_name:
-                    self.model_hf = AutoModelForMaskedLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
+                    self.model_hf = transformers.AutoModelForMaskedLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
                 else:
-                    self.model_hf = AutoModelForCausalLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
-                self.model_hf = PeftModel.from_pretrained(self.model_hf, self.peft_config)
+                    self.model_hf = transformers.AutoModelForCausalLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
+                self.model_hf = peft.PeftModel.from_pretrained(self.model_hf, self.peft_config)
             else:
                 # Set non-LoRA trained model
                 if 'flan' in self.model_name:
-                    self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+                    self.model_hf = transformers.AutoModelForSeq2SeqLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
                 elif 'bert' in self.model_name:
-                    self.model_hf = AutoModelForMaskedLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+                    self.model_hf = transformers.AutoModelForMaskedLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
                 else:
-                    self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
+                    self.model_hf = transformers.AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
         
         # Set tokenizer
         if load_peft_lora:
             # Set LoRA trained model's tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(self.peft_config.base_model_name_or_path)
+            self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.peft_config.base_model_name_or_path)
         else:
             # Set non-LoRA trained model's tokenizer
             if self.model_hf.config.tokenizer_class:
-                self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
+                self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
             else:
-                self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
+                self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
 
         # Set LoRA for training
         if len(peft_lora_args) > 0 and load_peft_lora is False:
             if self.model_name in self.supported_models_peft_lora:
                 if 'flan' in self.model_name:
-                    self.peft_config = LoraConfig(task_type=TaskType['SEQ_2_SEQ_LM'], **peft_lora_args)
+                    self.peft_config = peft.LoraConfig(task_type=peft.TaskType['SEQ_2_SEQ_LM'], **peft_lora_args)
                 else:
-                    self.peft_config = LoraConfig(task_type=TaskType['CAUSAL_LM'], **peft_lora_args)
+                    self.peft_config = peft.LoraConfig(task_type=peft.TaskType['CAUSAL_LM'], **peft_lora_args)
                 
-                self.model_hf = get_peft_model(self.model_hf, self.peft_config)
+                self.model_hf = peft.get_peft_model(self.model_hf, self.peft_config)
                 
                 print('PEFT LoRA configuration is applied:')
                 self.model_hf.print_trainable_parameters()
@@ -205,7 +204,7 @@ class HuggingFaceModelPack:
         return output_context
     
     # Generate text
-    def predict(self, text: Union[str, list[str], pd.Series], max_length: int=50, skip_special_tokens: bool=True, 
+    def predict(self, text: Union[str, list[str], pandas.Series], max_length: int=50, skip_special_tokens: bool=True, 
                 display_probability: bool=False, num_return_sequences: int=1, temperature: float=0.8, 
                 top_p: float=0.8, top_k: int=0, no_repeat_ngram_size: int=3, 
                 prompt_modifier: list[dict[str, Union[str, Callable]]]=None, keep_history: bool=False) -> Union[dict[str, str], list[str]]:
@@ -228,9 +227,9 @@ class HuggingFaceModelPack:
         input_context = None
 
         # Catch input exceptions
-        if not isinstance(text, str) and not isinstance(text, list) and not isinstance(text, pd.Series):
+        if not isinstance(text, str) and not isinstance(text, list) and not isinstance(text, pandas.Series):
             raise TypeError('Input text needs to be of type: string, list or pandas.series')
-        if isinstance(text, pd.Series): # convert to list from pandas series if available
+        if isinstance(text, pandas.Series): # convert to list from pandas series if available
             input_context = text.tolist()
             if len(input_context) == 0:
                 raise ValueError('Input text list cannot be empty')
@@ -304,13 +303,13 @@ class HuggingFaceModelPack:
                 return [pred.get('text', None) for pred in prediction] # return list as result
     
     # Tokenize function
-    def _tokenize_function(self, examples: Dataset) -> Dataset:
+    def _tokenize_function(self, examples: datasets.Dataset) -> datasets.Dataset:
         return self.tokenizer(examples['text'])
     
     # Tokenize pandas dataframe feature
-    def tokenize_text(self, x: list[str], batched: bool, num_proc: int) -> Dataset:  
-        df_sample = pd.DataFrame({'text': x})
-        hf_dataset = Dataset.from_pandas(df_sample)
+    def tokenize_text(self, x: list[str], batched: bool, num_proc: int) -> datasets.Dataset:  
+        df_sample = pandas.DataFrame({'text': x})
+        hf_dataset = datasets.Dataset.from_pandas(df_sample)
         if batched:
             tokenized_dataset = hf_dataset.map(self._tokenize_function, batched=batched, num_proc=num_proc)
         else:
@@ -319,7 +318,7 @@ class HuggingFaceModelPack:
         return tokenized_dataset
     
     # Model training
-    def fit(self, x: Union[list[str], pd.Series], y: Union[list[str], pd.Series], train_args: dict[str, Union[str, int, float]]={}, 
+    def fit(self, x: Union[list[str], pandas.Series], y: Union[list[str], pandas.Series], train_args: dict[str, Union[str, int, float]]={}, 
             instruct: bool=False, num_proc: int=4) -> None:
         '''
         Fine tuning of a language model from HuggingFace Hub
@@ -335,13 +334,13 @@ class HuggingFaceModelPack:
         None. Trained model is saved in the .result/ folder with name "model_" prepended to the specified title
         '''
         # Catch input exceptions
-        if not isinstance(x, list) and not isinstance(x, pd.Series):
+        if not isinstance(x, list) and not isinstance(x, pandas.Series):
             raise TypeError('Input data array, x, needs to be of type: list or pandas.series')
-        if isinstance(x, pd.Series): # convert to list from pandas series if available
+        if isinstance(x, pandas.Series): # convert to list from pandas series if available
             x = x.tolist()
-        if not isinstance(y, list) and not isinstance(y, pd.Series):
+        if not isinstance(y, list) and not isinstance(y, pandas.Series):
             raise TypeError('Input data array, y, needs to be of type: list or pandas.series')
-        if isinstance(y, pd.Series): # convert to list from pandas series if available
+        if isinstance(y, pandas.Series): # convert to list from pandas series if available
             y = y.tolist()
         if not isinstance(train_args, dict):
             raise TypeError('Input train args needs to be of type: dict')
@@ -362,10 +361,10 @@ class HuggingFaceModelPack:
         if instruct:
             print('Setting up training in sequence to sequence format...')
             tokenized_data = tokenized_data.add_column('labels', tokenized_target['input_ids']) # Create target sequence labels
-            data_collator = DataCollatorForSeq2Seq(tokenizer=self.tokenizer) # Organise data for training
+            data_collator = transformers.DataCollatorForSeq2Seq(tokenizer=self.tokenizer) # Organise data for training
             
             # Setup training in sequence to sequence format
-            training_args = Seq2SeqTrainingArguments(
+            training_args = transformers.Seq2SeqTrainingArguments(
                 optim=train_args['optimizer'], # model optimisation function
                 num_train_epochs=train_args['num_train_epochs'], # total number of training epochs
                 per_device_train_batch_size=train_args['per_device_train_batch_size'],  # batch size per device during training
@@ -377,7 +376,7 @@ class HuggingFaceModelPack:
                 logging_dir=train_args['logging_dir'], # log directory
             )
 
-            trainer = Seq2SeqTrainer(
+            trainer = transformers.Seq2SeqTrainer(
                 model=self.model_hf,
                 args=training_args,
                 train_dataset=tokenized_data.remove_columns(['text']),
@@ -389,10 +388,10 @@ class HuggingFaceModelPack:
             print('Setting up training in autoregressive format...')
             if 'bert' in self.model_hf.name_or_path: # force training task to be mlm for encoders
                 train_args['mlm'] = True
-            data_collator = DataCollatorForLanguageModeling(tokenizer=self.tokenizer, mlm=train_args['mlm']) # Organise data for training
+            data_collator = transformers.DataCollatorForLanguageModeling(tokenizer=self.tokenizer, mlm=train_args['mlm']) # Organise data for training
             
             # Setup training in autoregressive format
-            training_args = TrainingArguments(
+            training_args = transformers.TrainingArguments(
                 optim=train_args['optimizer'], 
                 num_train_epochs=train_args['num_train_epochs'], 
                 per_device_train_batch_size=train_args['per_device_train_batch_size'],
@@ -404,7 +403,7 @@ class HuggingFaceModelPack:
                 logging_dir=train_args['logging_dir'], 
             )
             
-            trainer = Trainer(
+            trainer = transformers.Trainer(
                 model=self.model_hf,
                 args=training_args,
                 train_dataset=tokenized_data.remove_columns(['text']),
