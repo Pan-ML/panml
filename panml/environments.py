@@ -24,7 +24,7 @@ class ImportEnvironment:
             if package_var not in sys.modules:
                 try:
                     if package_var not in vars():
-                        vars()[package_var] = importlib.import_module(package_var) # import the package if not found
+                        _ = importlib.import_module(package_var) # import the package if not found
                 except ImportError:
                     packages_not_found.append(package)
         
