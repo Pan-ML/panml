@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-# Dependencies for data processing and general machine learning implementations
-from typing import Union
-
 # Dependencies for vector search
 from panml.clustering.faiss import FAISSVectorEngine
 from panml.constants import SUPPORTED_VECTOR_SEARCH_SOURCES, SUPPORTED_EMBEDDING_MODELS
