@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-# Dependencies for data processing and general machine learning implementations
-import torch
-import torch.nn.functional as F
-from typing import Union
-
 # Dependencies for vector search
-from panml.core.clustering.faiss import FAISSVectorEngine
+from panml.clustering.faiss import FAISSVectorEngine
 from panml.constants import SUPPORTED_VECTOR_SEARCH_SOURCES, SUPPORTED_EMBEDDING_MODELS
+from panml.environments import ImportEnvironment
 
 # Entry vector engine class           
 class VectorEngine:
@@ -33,6 +29,7 @@ class VectorEngine:
         
         # FAISS vector search call
         if self.source == 'faiss':
+            ImportEnvironment(['faiss-cpu', 'sentence-transformers', 'openai', 'numpy', 'pandas']).validate() # Validate required packages
             self.instance = FAISSVectorEngine(self.model, self.model_emb_source, self.api_key)
             
         # Pinecone vector search call
@@ -44,7 +41,3 @@ class VectorEngine:
     # Direct to the attribute of the sub vector engine class (attribute not found in the main vector engine class)
     def __getattr__(self, name):
         return self.instance.__getattribute__(name)
-
-# Calculate cosine similarity of two matrices    
-def cosine_similarity(t1: torch.Tensor, t2: torch.Tensor) -> torch.Tensor:
-    return F.cosine_similarity(t1.view(1, -1), t2.view(1, -1))

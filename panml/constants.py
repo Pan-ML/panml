@@ -1,7 +1,7 @@
 """
 Constants used in the PanML package
 """
-
+# == Model name constants ==
 # Supported LLMs for generation
 SUPPORTED_LLMS = {
     'huggingface': [
@@ -44,6 +44,9 @@ SUPPORTED_LLMS = {
         'togethercomputer/RedPajama-INCITE-Base-3B-v1',
         'togethercomputer/RedPajama-INCITE-Instruct-3B-v1',
         'togethercomputer/RedPajama-INCITE-Chat-3B-v1',
+        'togethercomputer/RedPajama-INCITE-7B-Base',
+        'togethercomputer/RedPajama-INCITE-7B-Instruct',
+        'togethercomputer/RedPajama-INCITE-7B-Chat',
         'tiiuae/falcon-7b',
         'tiiuae/falcon-7b-instruct',
         'tiiuae/falcon-40b',
@@ -54,6 +57,9 @@ SUPPORTED_LLMS = {
         'bigscience/bloomz-3b',
         'bigscience/bloomz-7b1',
         'bigscience/bloomz',
+        'databricks/dolly-v2-3b',
+        'databricks/dolly-v2-7b',
+        'databricks/dolly-v2-12b',
     ],
     'openai': [
         'text-davinci-002', 
@@ -141,6 +147,39 @@ SUPPORTED_EMBEDDING_MODELS = {
     ],
 }
 
+# == Model operation variables ==
+# HuggingFace tokenizer arguments default
+TOKENIZER_DEFAULT_ARGS = {
+    'input_block_size': 20,
+    'padding_length': 100,
+    'tokenizer_batch': False,
+}
+
+# HuggingFace trainer arguments
+TRAINER_ARGS = [
+    'title', 
+    'num_train_epochs', 
+    'optimizer', 
+    'mlm', 
+    'per_device_train_batch_size', 
+    'per_device_eval_batch_size',
+    'warmup_steps', 
+    'weight_decay', 
+    'logging_steps', 
+    'output_dir', 
+    'logging_dir', 
+    'save_model'
+]
+
+# HuggingFace LoRA arguments
+PEFT_LORA_DEFAULT_ARGS = {
+    'inference_mode': False, 
+    'r': 8, 
+    'lora_alpha': 32, 
+    'lora_dropout': 0.1,
+}
+
+# == Prompt constants ==
 # Prompt templates
 CHAIN_OF_THOUGHT_PROMPT = [
     {"append": "Let's think this step by step."}
@@ -169,3 +208,19 @@ INTERROGATE_PROMPT = [
     {"append": "Explain why this is true: "},
     {"append": "Explain why this is true: "},
 ]
+
+# == Package versions ==
+IMPORT_PACKAGE_VER = {
+    'huggingface-hub': '0.14.1',
+    'numpy': '1.22.4',
+    'openai': '0.27.6',
+    'pandas': '2.0.1',
+    'tokenizers': '0.13.3',
+    'transformers': '4.27.4',
+    'datasets': '2.12.0',
+    'torch': '2.0.0',
+    'faiss-cpu': '1.7.4',
+    'sentence-transformers': '2.2.2',
+    'accelerate': '0.19.0',
+    'peft': '0.3.0',
+}

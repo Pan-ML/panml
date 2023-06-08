@@ -1,9 +1,9 @@
 from __future__ import annotations
 import pandas as pd
+import openai
 import torch
 from typing import Union, Callable
-import openai
-from panml.constants import SUPPORTED_OAI_CODE_MODELS, SUPPORTED_OAI_COMPLETION_MODELS, SUPPORTED_OAI_CHAT_MODELS
+from panml.constants import SUPPORTED_OAI_CODE_MODELS, SUPPORTED_OAI_COMPLETION_MODELS, SUPPORTED_OAI_CHAT_MODELS, SUPPORTED_EMBEDDING_MODELS
 
 # OpenAI model class
 class OpenAIModelPack:
@@ -11,13 +11,13 @@ class OpenAIModelPack:
     OpenAI model pack class
     '''
     def __init__(self, model: str, api_key: str) -> None:
-        self.model_name = model
-        self.model_embedding = 'text-embedding-ada-002'
-        self.prediction_history = None
-        self.supported_code_models = SUPPORTED_OAI_CODE_MODELS
-        self.completion_models = SUPPORTED_OAI_COMPLETION_MODELS
-        self.chat_completion_models = SUPPORTED_OAI_CHAT_MODELS
-        openai.api_key = api_key
+        self.model_name = model # model name
+        self.model_embedding = SUPPORTED_EMBEDDING_MODELS['openai'] # model embedding name
+        self.supported_code_models = SUPPORTED_OAI_CODE_MODELS # supported code models
+        self.completion_models = SUPPORTED_OAI_COMPLETION_MODELS # supported completion models
+        self.chat_completion_models = SUPPORTED_OAI_CHAT_MODELS # supported chat models
+        openai.api_key = api_key # set api key
+        self.prediction_history = [] # model inference history in prompt loop
         
     def _init_prompt(self) -> list[dict[str, Union[str, Callable]]]:
         return [{'prepend': '', 'append': '', 'transform': None}]
@@ -25,7 +25,7 @@ class OpenAIModelPack:
     # Generate text of single model call
     def _predict(self, text: str, temperature: float, max_tokens: int, top_p: float, n: int, 
                  frequency_penalty: float, presence_penalty: float, display_probability: bool, logprobs: int, 
-                 chat_role: str) -> dict[str, str]:
+                 chat_role: str, stream: bool) -> dict[str, str]:
         '''
         Base function for text generation using OpenAI models
 
@@ -53,8 +53,14 @@ class OpenAIModelPack:
                 n=n,
                 frequency_penalty=frequency_penalty,
                 presence_penalty=presence_penalty,
-                logprobs=logprobs
+                logprobs=logprobs,
+                stream=stream,
             )
+            
+            # Return response stream
+            if stream:
+                return response
+            
             output_context['text'] = response['choices'][0]['text']
             
         elif self.model_name in self.chat_completion_models:
@@ -69,7 +75,13 @@ class OpenAIModelPack:
                 n=n,
                 frequency_penalty=frequency_penalty,
                 presence_penalty=presence_penalty,
+                stream=stream
             )
+
+            # Return response stream
+            if stream:
+                return response
+            
             output_context['text'] = response['choices'][0]['message']['content']
         else:
             raise ValueError(f'{self.model_name} is not currently supported in this package')
@@ -89,7 +101,7 @@ class OpenAIModelPack:
     def predict(self, text: Union[str, list[str], pd.Series], temperature: float=0, max_length: int=100, top_p: float=1, n: int=3, 
                 frequency_penalty: float=0, presence_penalty: float=0, display_probability: bool=False, logprobs: int=1, 
                 prompt_modifier: list[dict[str, str]]=None, keep_history: bool=False, 
-                chat_role: str='user') -> Union[dict[str, str], list[str]]:
+                chat_role: str='user', stream: bool=False) -> Union[dict[str, str], list[str]]:
         '''
         Generates output by prompting a language model from OpenAI
         
@@ -106,6 +118,7 @@ class OpenAIModelPack:
         prompt_modifier: list of prompts to be added in the context of multi-stage prompt chaining
         keep_history: keep or discard the history of responses from the mulit-stage prompt chaining
         chat_role: parameter from OpenAI API, specifies the role of the LLM assistant. Currently this is available for models of gpt-3.5-turbo or above (for further details please refer to this topic covered in language model text generation)
+        stream: parameter from OpenAI API, specifies for streaming mode for text generation
 
         Returns: 
         prediction: list, or list of dict containing generated text with probabilities and perplexity if specified and available
@@ -135,6 +148,11 @@ class OpenAIModelPack:
                 raise TypeError('Input prompt modifier needs to be of type: list')
         if not isinstance(chat_role, str):
             raise TypeError('Input chat role needs to be of type: string')
+        if not isinstance(stream, bool):
+            raise TypeError('Input stream needs to be of type: boolean')
+        else:
+            if stream and not isinstance(text, str):
+                raise ValueError('Streaming is not available for inputs (e.g. list or pandas dataframe column) that are outside of the string input use-case')
             
         # Run prediction on text samples
         prediction = []
@@ -158,29 +176,40 @@ class OpenAIModelPack:
                 else:
                     context = f"{mod['prepend']}\n{context}\n{mod['append']}"
 
-                # Call model for text generation
-                output_context = self._predict(context, temperature=temperature, max_tokens=max_length, top_p=top_p,
-                                               n=n, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
-                                               display_probability=display_probability, logprobs=logprobs, chat_role=chat_role)
-
-                # Terminate loop for next prompt when context contains no meaningful words (less than 2)
-                output_context['text'] = output_context['text'].replace('\n', ' ').replace('\xa0', '').replace('  ', ' ')
-                output_context['text'] = output_context['text'].replace(',', ', ')
-                output_context['text'] = output_context['text'].replace('.', '. ')
-                output_context['text'] = output_context['text'].replace('  ', ' ')
-                if len(output_context['text'].replace(' ', '')) < 2:
-                    break
-
-                history.append(output_context)
-            
-            try:
-                if keep_history:
-                    prediction.append(history[-1]) # saves last prediction output
-                    self.prediction_history.append(history) # saves all historical prediction output
+                if stream and count == len(prompt_modifier) - 1 and isinstance(text, str):
+                    # Call model for text generation in streaming mode
+                    output_context = self._predict(context, temperature=temperature, max_tokens=max_length, top_p=top_p,
+                                                n=n, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
+                                                display_probability=display_probability, logprobs=logprobs, chat_role=chat_role, 
+                                                stream=True)
+                    return output_context
                 else:
-                    prediction.append(history[-1])
-            except:
-                prediction.append({'text': None}) # if there is invalid response from the language model, return None
+                    if stream:
+                        print('Streaming is not applied. Streaming is only available for single prompt inputs.')
+                    # Call model for text generation
+                    output_context = self._predict(context, temperature=temperature, max_tokens=max_length, top_p=top_p,
+                                                n=n, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty,
+                                                display_probability=display_probability, logprobs=logprobs, chat_role=chat_role, 
+                                                stream=False)
+
+                    # Terminate loop for next prompt when context contains no meaningful words (less than 2)
+                    output_context['text'] = output_context['text'].replace('\n', ' ').replace('\xa0', '').replace('  ', ' ')
+                    output_context['text'] = output_context['text'].replace(',', ', ')
+                    output_context['text'] = output_context['text'].replace('.', '. ')
+                    output_context['text'] = output_context['text'].replace('  ', ' ')
+                    if len(output_context['text'].replace(' ', '')) < 2:
+                        break
+
+                    history.append(output_context)
+            
+                    try:
+                        if keep_history:
+                            prediction.append(history[-1]) # saves last prediction output
+                            self.prediction_history.append(history) # saves all historical prediction output
+                        else:
+                            prediction.append(history[-1])
+                    except:
+                        prediction.append({'text': None}) # if there is invalid response from the language model, return None
 
         # Gather output
         if isinstance(text, str):

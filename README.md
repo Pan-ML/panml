@@ -12,15 +12,15 @@ Please note this is a work in progress, and it's open for collabration and contr
 ### What this library covers
 - [Inference and analysis of LLM](https://github.com/Pan-ML/panml/wiki/5.-Generative-model-analysis)
 - [Prompt chain engineering with LLM](https://github.com/Pan-ML/panml/wiki/2.-Prompt-chain-engineering)
-- [Fine tuning of LLM](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM)
+- [Fine tuning of LLM (also with PEFT LoRA)](https://github.com/Pan-ML/panml/wiki/3.-Fine-tuning-your-LLM)
 - [Document question answering using LLM](https://github.com/Pan-ML/panml/wiki/7.-Retrieve-similar-documents-using-vector-search)
 - [Variable integrated code generation using LLM](https://github.com/Pan-ML/panml/wiki/4.-Prompted-code-generation)
 
 ### Current supported foundation models
 - [HuggingFace Hub](https://huggingface.co) - open source LLMs from Google, EleutherAI, Cerebras, StabilityAI, H2O, Salesforce, and others
-- [OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5
+- [OpenAI](https://openai.com) - text-davinci-002/003, GPT3/3.5/turbo
 
-See model options in [library supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models)
+For the full list of supported models and their respective details, please see [library supported models](https://github.com/Pan-ML/panml/wiki/8.-Supported-models).
 
 For performance overview of open source LLMs (including models not currently covered in this library), you can find the information on the [HuggingFace Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard).
 

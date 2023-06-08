@@ -1,12 +1,12 @@
 from __future__ import annotations
 import pandas as pd
 import torch
-from typing import Union, Callable
 from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer
 from transformers import TrainingArguments, Trainer, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
 from datasets import Dataset
 from peft import get_peft_model, PeftModel, PeftConfig, LoraConfig, TaskType
-from panml.constants import SUPPORTED_LLMS_PEFT_LORA
+from typing import Union, Callable
+from panml.constants import SUPPORTED_LLMS_PEFT_LORA, TOKENIZER_DEFAULT_ARGS, TRAINER_ARGS, PEFT_LORA_DEFAULT_ARGS
 
 # HuggingFace model class
 class HuggingFaceModelPack:
@@ -14,23 +14,25 @@ class HuggingFaceModelPack:
     HuggingFace Hub model pack class
     '''
     # Initialize class variables
-    def __init__(self, model: str, input_block_size: int, padding_length: int, tokenizer_batch: bool, source: str, model_args: dict) -> None:
-        self.model_name = model
-        self.padding_length = padding_length
-        self.input_block_size = input_block_size
-        self.tokenizer_batch = tokenizer_batch
-        self.prediction_history = []
-        self.evaluation_result = None
-        self.device = 'cpu'
-        self.supported_models_peft_lora = SUPPORTED_LLMS_PEFT_LORA
-        self.peft_config = None
-        self.train_default_args = ['title', 'num_train_epochs', 'optimizer', 'mlm', 
-                                   'per_device_train_batch_size', 'per_device_eval_batch_size',
-                                   'warmup_steps', 'weight_decay', 'logging_steps', 
-                                   'output_dir', 'logging_dir', 'save_model']
+    def __init__(self, model: str, source: str, model_args: dict) -> None:
+        self.model_name = model # model name
+        self.trainer_args = TRAINER_ARGS # model trainer arguments
+        self.supported_models_peft_lora = SUPPORTED_LLMS_PEFT_LORA # supported LLMs for LoRA implementation
+        self.peft_config = None # PEFT LoRA configuration
+        self.device = 'cpu' # model training and inference hardware setting
+        self.evaluation_result = None # model training evaluation result
+        self.prediction_history = [] # model inference history in prompt loop
+        
+        # Get tokenizer arguments
+        tokenzier_args = {k: model_args.pop(k) for k in list(TOKENIZER_DEFAULT_ARGS.keys()) if k in model_args}
+        for k in TOKENIZER_DEFAULT_ARGS:
+            tokenzier_args.setdefault(k, TOKENIZER_DEFAULT_ARGS[k])
+        self.padding_length = tokenzier_args['padding_length']
+        self.input_block_size = tokenzier_args['input_block_size']
+        self.tokenizer_batch = tokenzier_args['tokenizer_batch']
         
         # Get PEFT LoRA configuration from model args
-        peft_lora_args, load_peft_lora = {}, None
+        peft_lora_args, load_peft_lora = {}, False
         if 'peft_lora' in model_args:
             peft_lora_args = model_args.pop('peft_lora')
             if 'load' in peft_lora_args:
@@ -38,9 +40,11 @@ class HuggingFaceModelPack:
             else:
                 if not isinstance(load_peft_lora, bool):
                     raise TypeError('Input model args, peft_lora, load needs to be of type: boolean')
-                
             if 'task_type' in peft_lora_args:
                 _ = peft_lora_args.pop('task_type') # remove task_type from input args to avoid duplication
+
+            for k in PEFT_LORA_DEFAULT_ARGS:
+                peft_lora_args.setdefault(k, PEFT_LORA_DEFAULT_ARGS[k]) # set default arguments for LoRA
 
         # Get CPU/GPU configuration from model args
         set_gpu = False
@@ -101,7 +105,7 @@ class HuggingFaceModelPack:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
 
         # Set LoRA for training
-        if peft_lora_args is not {} and load_peft_lora is False:
+        if len(peft_lora_args) > 0 and load_peft_lora is False:
             if self.model_name in self.supported_models_peft_lora:
                 if 'flan' in self.model_name:
                     self.peft_config = LoraConfig(task_type=TaskType['SEQ_2_SEQ_LM'], **peft_lora_args)
@@ -110,10 +114,10 @@ class HuggingFaceModelPack:
                 
                 self.model_hf = get_peft_model(self.model_hf, self.peft_config)
                 
-                print('PEFT LoRA configuration applied:')
+                print('PEFT LoRA configuration is applied:')
                 self.model_hf.print_trainable_parameters()
             else:
-                print('PEFT LoRA configuration not set. Current supported models for LoRA are: ' + ' '.join([f"{m}" for m in self.supported_models_peft_lora]))
+                print('PEFT LoRA configuration is not set. Current supported models for LoRA are: ' + ' '.join([f"{m}" for m in self.supported_models_peft_lora]))
 
         # Set model on GPU if available and specified
         self.model_hf.to(torch.device(self.device))
@@ -222,7 +226,6 @@ class HuggingFaceModelPack:
         prediction: list, or list of dict containing generated text with probabilities and perplexity if specified and available
         '''
         input_context = None
-        self.prediction_history = []
 
         # Catch input exceptions
         if not isinstance(text, str) and not isinstance(text, list) and not isinstance(text, pd.Series):
@@ -353,8 +356,8 @@ class HuggingFaceModelPack:
         tokenized_target = self.tokenize_text(y, batched=self.tokenizer_batch, num_proc=num_proc)
         
         # Check for missing input arguments
-        if set(list(train_args.keys())) != set(self.train_default_args):
-            raise ValueError(f'Train args are not in the required format - missing: {", ".join(list(set(self.train_default_args) - set(list(train_args.keys()))))}')
+        if set(list(train_args.keys())) != set(self.trainer_args):
+            raise ValueError(f'Train args are not in the required format - missing: {", ".join(list(set(self.trainer_args) - set(list(train_args.keys()))))}')
         
         if instruct:
             print('Setting up training in sequence to sequence format...')
