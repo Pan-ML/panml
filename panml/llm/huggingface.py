@@ -417,11 +417,11 @@ class HuggingFaceModelPack:
         trainer.train() # Execute training
 
         print('Getting evaluations...')
-        self.evaluation_result = trainer.evaluate() # Save evaluation result
+        self.evaluation_result = trainer.evaluate() # save evaluation result
         
         if train_args['save_model']:
-            trainer.save_model(f'./results/model_{train_args["title"]}') # Save trained model
-            self.tokenizer._tokenizer.save(f'./results/model_{train_args["title"]}/tokenizer.json') # Save tokenizer
+            trainer.save_model(f'./results/model_{train_args["title"]}') # save trained model
+            self.tokenizer._tokenizer.save(f'./results/model_{train_args["title"]}/tokenizer.json') # save tokenizer
 
         print('Task completed')
         
@@ -438,5 +438,5 @@ class HuggingFaceModelPack:
         '''
         if save_dir is None:
             save_dir = f'./results/model_{self.model_name}'
-        self.model_hf.save_pretrained(save_dir)
-        self.tokenizer._tokenizer.save(f'{save_dir}/tokenizer.json')
+        self.model_hf.save_pretrained(save_dir) # save model
+        self.tokenizer._tokenizer.save(f'{save_dir}/tokenizer.json') # save tokenizer
