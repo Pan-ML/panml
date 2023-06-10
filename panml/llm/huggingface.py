@@ -103,6 +103,8 @@ class HuggingFaceModelPack:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
             else:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.model_hf.config.eos_token_id
 
         # Set LoRA for training
         if len(peft_lora_args) > 0 and load_peft_lora is False:
@@ -415,10 +417,11 @@ class HuggingFaceModelPack:
         trainer.train() # Execute training
 
         print('Getting evaluations...')
-        self.evaluation_result = trainer.evaluate() # Save evaluation result
+        self.evaluation_result = trainer.evaluate() # save evaluation result
         
         if train_args['save_model']:
-            trainer.save_model(f'./results/model_{train_args["title"]}') # Save trained model
+            trainer.save_model(f'./results/model_{train_args["title"]}') # save trained model
+            self.tokenizer._tokenizer.save(f'./results/model_{train_args["title"]}/tokenizer.json') # save tokenizer
 
         print('Task completed')
         
@@ -435,4 +438,5 @@ class HuggingFaceModelPack:
         '''
         if save_dir is None:
             save_dir = f'./results/model_{self.model_name}'
-        self.model_hf.save_pretrained(save_dir)
+        self.model_hf.save_pretrained(save_dir) # save model
+        self.tokenizer._tokenizer.save(f'{save_dir}/tokenizer.json') # save tokenizer
