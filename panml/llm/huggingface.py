@@ -103,8 +103,11 @@ class HuggingFaceModelPack:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
             else:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.model_hf.config.eos_token_id
+        self.tokenizer.pad_token = '[PAD]' # set padding token
+        try:
+            self.tokenizer.deprecation_warnings["Asking-to-pad-a-fast-tokenizer"] = True # turn off warning for fast tokenizer as we are tokenizing data before training
+        except:
+            pass
 
         # Set LoRA for training
         if len(peft_lora_args) > 0 and load_peft_lora is False:
