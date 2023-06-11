@@ -202,14 +202,14 @@ class OpenAIModelPack:
 
                 history.append(output_context)
         
-                try:
-                    if keep_history:
-                        prediction.append(history[-1]) # saves last prediction output
-                        self.prediction_history.append(history) # saves all historical prediction output
-                    else:
-                        prediction.append(history[-1])
-                except:
-                    prediction.append({'text': None}) # if there is invalid response from the language model, return None
+            try:
+                if keep_history:
+                    prediction.append(history[-1]) # saves last prediction output
+                    self.prediction_history.append(history) # saves all historical prediction output
+                else:
+                    prediction.append(history[-1])
+            except:
+                prediction.append({'text': None}) # if there is invalid response from the language model, return None
 
         # Gather output
         if isinstance(text, str):
