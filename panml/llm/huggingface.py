@@ -378,7 +378,7 @@ class HuggingFaceModelPack:
                 warmup_steps=train_args['warmup_steps'], # number of warmup steps for learning rate scheduler
                 weight_decay=train_args['weight_decay'], # strength of weight decay
                 logging_steps=train_args['logging_steps'],
-                output_dir='./results', # output directory
+                output_dir=train_args['output_dir'], # output directory
                 logging_dir=train_args['logging_dir'], # log directory
             )
 
