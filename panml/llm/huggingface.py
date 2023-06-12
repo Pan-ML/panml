@@ -95,10 +95,10 @@ class HuggingFaceModelPack:
         
         # Set tokenizer
         if load_peft_lora:
-            # Set LoRA trained model's tokenizer
+            # Get tokenizer name from peft base model
             self.tokenizer = AutoTokenizer.from_pretrained(self.peft_config.base_model_name_or_path)
         else:
-            # Set non-LoRA trained model's tokenizer
+            # Get non-LoRA trained model's tokenizer
             if self.model_hf.config.tokenizer_class:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_hf.config.tokenizer_class.lower().replace('tokenizer', ''), mirror='https://huggingface.co')
             else:
