@@ -77,13 +77,13 @@ class HuggingFaceModelPack:
             if load_peft_lora:
                 # Set LoRA trained model
                 self.peft_config = PeftConfig.from_pretrained(self.model_name)
-                if 'flan' in self.model_name:
-                    self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
-                elif 'bert' in self.model_name:
-                    self.model_hf = AutoModelForMaskedLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
+                if 'flan' in self.peft_config.base_model_name_or_path:
+                    self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args)
+                elif 'bert' in self.peft_config.base_model_name_or_path:
+                    self.model_hf = AutoModelForMaskedLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args)
                 else:
-                    self.model_hf = AutoModelForCausalLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args, local_files_only=True)
-                self.model_hf = PeftModel.from_pretrained(self.model_hf, self.peft_config)
+                    self.model_hf = AutoModelForCausalLM.from_pretrained(self.peft_config.base_model_name_or_path, **model_args)
+                self.model_hf = PeftModel.from_pretrained(self.model_hf, self.model_name)
             else:
                 # Set non-LoRA trained model
                 if 'flan' in self.model_name:
@@ -104,10 +104,7 @@ class HuggingFaceModelPack:
             else:
                 self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, mirror='https://huggingface.co')
         self.tokenizer.pad_token = '[PAD]' # set padding token
-        try:
-            self.tokenizer.deprecation_warnings["Asking-to-pad-a-fast-tokenizer"] = True # turn off warning for fast tokenizer as we are tokenizing data before training
-        except:
-            pass
+        self.tokenizer.deprecation_warnings["Asking-to-pad-a-fast-tokenizer"] = True # turn off warning for fast tokenizer as we are tokenizing data before training
 
         # Set LoRA for training
         if len(peft_lora_args) > 0 and load_peft_lora is False:
@@ -180,8 +177,8 @@ class HuggingFaceModelPack:
             'text': None
         }
         
-        input_ids = self.tokenizer.encode(text, return_tensors='pt').to(torch.device(self.device))
-        output = self.model_hf.generate(input_ids, 
+        input_ids = self.tokenizer(text, return_tensors='pt').to(torch.device(self.device))
+        output = self.model_hf.generate(**input_ids, 
                                         max_length=max_length,
                                         pad_token_id=self.model_hf.config.eos_token_id,
                                         num_return_sequences=num_return_sequences, 
@@ -378,7 +375,7 @@ class HuggingFaceModelPack:
                 warmup_steps=train_args['warmup_steps'], # number of warmup steps for learning rate scheduler
                 weight_decay=train_args['weight_decay'], # strength of weight decay
                 logging_steps=train_args['logging_steps'],
-                output_dir=train_args['output_dir'], # output directory
+                output_dir='./results', # output directory
                 logging_dir=train_args['logging_dir'], # log directory
             )
 
@@ -417,14 +414,14 @@ class HuggingFaceModelPack:
                 data_collator=data_collator,
             )
 
-        trainer.train() # Execute training
+        trainer.train() # execute training
 
         print('Getting evaluations...')
         self.evaluation_result = trainer.evaluate() # save evaluation result
         
         if train_args['save_model']:
-            trainer.save_model(f'./results/model_{train_args["title"]}') # save trained model
-            self.tokenizer._tokenizer.save(f'./results/model_{train_args["title"]}/tokenizer.json') # save tokenizer
+            self.model_hf.save_pretrained(f'{train_args["output_dir"]}/model_{train_args["title"]}') # save model
+            self.tokenizer._tokenizer.save(f'{train_args["output_dir"]}/model_{train_args["title"]}/tokenizer.json') # save tokenizer
 
         print('Task completed')
         
@@ -441,5 +438,5 @@ class HuggingFaceModelPack:
         '''
         if save_dir is None:
             save_dir = f'./results/model_{self.model_name}'
-        self.model_hf.save_pretrained(save_dir) # save model
-        self.tokenizer._tokenizer.save(f'{save_dir}/tokenizer.json') # save tokenizer
+        self.model_hf.save_pretrained(save_dir)
+        self.tokenizer._tokenizer.save(f'{save_dir}/tokenizer.json')
