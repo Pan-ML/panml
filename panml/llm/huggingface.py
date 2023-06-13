@@ -93,6 +93,12 @@ class HuggingFaceModelPack:
                 else:
                     self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
         
+        # Display max context tokens for the model, which can be useful.
+        try:
+            print(f"Max context tokens length: {self.model_hf.config.n_positions}")
+        except:
+            pass
+
         # Set tokenizer
         if load_peft_lora:
             # Get tokenizer name from peft base model
