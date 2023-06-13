@@ -96,7 +96,7 @@ class HuggingFaceModelPack:
         # CPU/GPU setup, max context tokens for the model
         max_context_tokens_msg = ''
         try:
-            max_context_tokens_msg = f"Max context tokens length: self.model_hf.config.n_positions"
+            max_context_tokens_msg = f"Max context tokens length: {self.model_hf.config.n_positions}"
         except:
             pass
         print(f"Model processing is set on {self.device.upper()}. {max_context_tokens_msg}")
