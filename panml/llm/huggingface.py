@@ -92,13 +92,14 @@ class HuggingFaceModelPack:
                 else:
                     self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args, local_files_only=True)
         
-        # Display model properties, i.e. CPU/GPU setup and max context tokens for the model, which can be useful.
-        max_context_tokens = ''
+        # Display model properties
+        # CPU/GPU setup, max context tokens for the model
+        max_context_tokens_msg = ''
         try:
-            max_context_tokens = self.model_hf.config.n_positions
+            max_context_tokens_msg = f"Max context tokens length: self.model_hf.config.n_positions"
         except:
             pass
-        print(f"Model processing is set on {self.device.upper()}. Max context tokens length: {max_context_tokens}")
+        print(f"Model processing is set on {self.device.upper()}. {max_context_tokens_msg}")
 
         # Set tokenizer
         if load_peft_lora:
