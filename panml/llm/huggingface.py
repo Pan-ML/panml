@@ -180,8 +180,8 @@ class HuggingFaceModelPack:
             'text': None
         }
         
-        input_ids = self.tokenizer(text, return_tensors='pt').to(torch.device(self.device))
-        output = self.model_hf.generate(**input_ids, 
+        input_batch = self.tokenizer(text, return_tensors='pt').to(torch.device(self.device))
+        output = self.model_hf.generate(**input_batch, 
                                         max_length=max_length,
                                         pad_token_id=self.model_hf.config.eos_token_id,
                                         num_return_sequences=num_return_sequences, 
