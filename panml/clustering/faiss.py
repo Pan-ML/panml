@@ -164,7 +164,7 @@ class FAISSVectorEngine:
         k: top number of simiilar documents w.r.t the search query
 
         Returns: 
-        list of the top k documents
+        list of the top k documents, and optionally include document indices if return_index is set True
         '''
         # Catch input exceptions
         if not isinstance(query, str):
