@@ -120,7 +120,7 @@ class FAISSVectorEngine:
                 raise ValueError('IVFPQ vector search not set due to missing m and bits inputs')
 
         # Saving the vector store
-        if model_name:
+        if model_name is not None:
             faiss.write_index(self.vectors, f"{model_name}_vectors.faiss") # vectors file
             with open(f"{model_name}_corpus.pkl", "wb") as f: # corpus file
                 pickle.dump(self.corpus, f)
