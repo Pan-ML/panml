@@ -155,7 +155,7 @@ class FAISSVectorEngine:
             self.corpus = pickle.load(f)
 
     # Perform vector search of query against stored vectors and retrieve top k results
-    def search(self, query: str, k: int) -> list[str]:
+    def search(self, query: str, k: int, return_index: bool=False) -> Union[list[str], dict[str, str]]:
         '''
         Runs vector search of input query against the stored vectors.
         
@@ -177,9 +177,15 @@ class FAISSVectorEngine:
         else:
             if k < 1:
                 raise ValueError('Input k cannot be less than 1')
+        if not isinstance(return_index, bool):
+            raise TypeError('Input return index needs to be of type boolean')
             
         if k > len(self.corpus):
             k = len(self.corpus) # cap the max k to the maximum number of documents in the corpus store
         query_vector = self._get_embedding([query], self.model_emb_source) # embed input vector
-        D, I = self.vectors.search(query_vector, k) # perform vector search
-        return list(np.array(self.corpus)[I][0])
+        _, I = self.vectors.search(query_vector, k) # perform vector search
+
+        if return_index:
+            return {'sample': list(np.array(self.corpus)[I][0]), 'idx': list(I[0])} # return samples and idx
+        else:
+            return list(np.array(self.corpus)[I][0]) # return samples only
