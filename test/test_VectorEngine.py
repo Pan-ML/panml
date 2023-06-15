@@ -254,3 +254,31 @@ class TestVectorEngine(unittest.TestCase):
             # Run vector search validation
             m = VectorEngine(source='faiss')
             m.store(TEST_CORPUS_1, mode='ivfpq', model_name=None)
+
+    # Test case: handle invalid search return index
+    print('Setup test_faiss_hf_invalid_search_return_index')
+    def test_faiss_hf_invalid_search_return_index(self):
+        # test invalid search return index input type
+        with self.assertRaises(TypeError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_SAMPLE = 'white rabbit'
+            m.store(TEST_CORPUS_1, model_name=None)
+            output = m.search(TEST_SAMPLE, 3, return_index=1)
+
+        with self.assertRaises(TypeError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_SAMPLE = 'white rabbit'
+            m.store(TEST_CORPUS_1, model_name=None)
+            output = m.search(TEST_SAMPLE, 3, return_index=0.1)
+
+        with self.assertRaises(TypeError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_SAMPLE = 'white rabbit'
+            m.store(TEST_CORPUS_1, model_name=None)
+            output = m.search(TEST_SAMPLE, 3, return_index=[1])
+
+        with self.assertRaises(TypeError):
+            m = VectorEngine(model='distilbert-base-nli-stsb-mean-tokens', source='faiss')
+            TEST_SAMPLE = 'white rabbit'
+            m.store(TEST_CORPUS_1, model_name=None)
+            output = m.search(TEST_SAMPLE, 3, return_index=None)
