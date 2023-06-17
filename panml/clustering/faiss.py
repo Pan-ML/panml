@@ -31,7 +31,7 @@ class FAISSVectorEngine:
         else:
             raise ValueError('Embedding model is not recognised or currently supported')
         self.corpus = None
-        self.stored_vectors = None
+        self.vectors = None
         
     def _get_openai_embedding(self, text: str, model: str) -> list[str]:
         text = text.replace('\n', ' ')
@@ -150,7 +150,7 @@ class FAISSVectorEngine:
                 raise ValueError('Input corpus directory needs to end with .pkl')
         
         # Load the vectors and corpus
-        self.stored_vectors = faiss.read_index(f"{vectors_dir}") # load vectors
+        self.vectors = faiss.read_index(f"{vectors_dir}") # load vectors
         with open(f"{corpus_dir}", "rb") as f: # load corpus
             self.corpus = pickle.load(f)
 
@@ -186,6 +186,6 @@ class FAISSVectorEngine:
         _, I = self.vectors.search(query_vector, k) # perform vector search
 
         if return_index:
-            return {'sample': list(np.array(self.corpus)[I][0]), 'idx': list(I[0])} # return samples and idx
+            return {'sample': list(np.array(self.corpus)[I][0]), 'id': list(I[0])} # return samples and idx
         else:
             return list(np.array(self.corpus)[I][0]) # return samples only
