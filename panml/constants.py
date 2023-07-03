@@ -179,6 +179,14 @@ PEFT_LORA_DEFAULT_ARGS = {
     'lora_dropout': 0.1,
 }
 
+# Bits and Bytes configuration default arguments
+BNB_DEFAULT_ARGS = {
+    'load_in_4bit': True,
+    'bnb_4bit_use_double_quant': True,
+    'bnb_4bit_quant_type': 'nf4',
+    'bnb_4bit_compute_dtype': 'torch.bfloat16'
+}
+
 # == Prompt constants ==
 # Prompt templates
 CHAIN_OF_THOUGHT_PROMPT = [
