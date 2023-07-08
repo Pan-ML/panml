@@ -1,12 +1,12 @@
 from __future__ import annotations
 import pandas as pd
 import torch
-from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer, BitsAndBytesConfig
 from transformers import TrainingArguments, Trainer, Seq2SeqTrainingArguments, Seq2SeqTrainer, DataCollatorForLanguageModeling, DataCollatorForSeq2Seq
 from datasets import Dataset
 from peft import get_peft_model, PeftModel, PeftConfig, LoraConfig, TaskType
 from typing import Union, Callable
-from panml.constants import SUPPORTED_LLMS_PEFT_LORA, TOKENIZER_DEFAULT_ARGS, TRAINER_ARGS, PEFT_LORA_DEFAULT_ARGS
+from panml.constants import SUPPORTED_LLMS_PEFT_LORA, TOKENIZER_DEFAULT_ARGS, TRAINER_ARGS, PEFT_LORA_DEFAULT_ARGS, BNB_DEFAULT_ARGS
 
 # HuggingFace model class
 class HuggingFaceModelPack:
@@ -22,6 +22,7 @@ class HuggingFaceModelPack:
         self.device = 'cpu' # model training and inference hardware setting
         self.evaluation_result = None # model training evaluation result
         self.prediction_history = [] # model inference history in prompt loop
+        self.qlora = False  # bool for QLoRA finetuning
         
         # Get tokenizer arguments
         tokenzier_args = {k: model_args.pop(k) for k in list(TOKENIZER_DEFAULT_ARGS.keys()) if k in model_args}
@@ -30,7 +31,20 @@ class HuggingFaceModelPack:
         self.padding_length = tokenzier_args['padding_length']
         self.input_block_size = tokenzier_args['input_block_size']
         self.tokenizer_batch = tokenzier_args['tokenizer_batch']
-        
+
+        # Get QLoRA configuration from model args
+        if 'qlora' in model_args:
+            qlora_args = model_args.pop('qlora')
+            if 'bnb_config' in qlora_args:
+                self.qlora = True
+                bnb_config = qlora_args.pop('bnb_config')
+                if not isinstance(bnb_config, BitsAndBytesConfig):
+                    for i in BNB_DEFAULT_ARGS:
+                        bnb_config.setdefault(i, BNB_DEFAULT_ARGS[i])
+                    bnb_config = BitsAndBytesConfig(**bnb_config)
+            else:
+                raise ValueError('QLoRA should contain bits and bytes configuration for quantization_config')
+                
         # Get PEFT LoRA configuration from model args
         peft_lora_args, load_peft_lora = {}, False
         if 'peft_lora' in model_args:
@@ -73,7 +87,17 @@ class HuggingFaceModelPack:
             else:
                 self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, **model_args)
         elif source == 'local':
-            if load_peft_lora:
+            if self.qlora:
+                # Set QLoRA trained model
+                self.peft_config = PeftConfig.from_pretrained(self.model_name)
+                if 'flan' in self.peft_config.base_model_name_or_path:
+                    self.model_hf = AutoModelForSeq2SeqLM.from_pretrained(self.peft_config.base_model_name_or_path, quantization_config=bnb_config, **model_args)
+                elif 'bert' in self.peft_config.base_model_name_or_path:
+                    self.model_hf = AutoModelForMaskedLM.from_pretrained(self.peft_config.base_model_name_or_path, quantization_config=bnb_config, **model_args)
+                else:
+                    self.model_hf = AutoModelForCausalLM.from_pretrained(self.peft_config.base_model_name_or_path, quantization_config=bnb_config, **model_args)
+                self.model_hf = PeftModel.from_pretrained(self.model_hf, self.model_name)
+            elif load_peft_lora:
                 # Set LoRA trained model
                 self.peft_config = PeftConfig.from_pretrained(self.model_name)
                 if 'flan' in self.peft_config.base_model_name_or_path:
