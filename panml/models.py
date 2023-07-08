@@ -44,7 +44,7 @@ class ModelPack:
                 raise ValueError('api key has not been specified for OpenAI model call')
             self.instance = OpenAIModelPack(model=self.model, api_key=self.api_key)
 
-    # Direct to the attribute ofthe sub model pack class (attribute not found in the main model pack class)
+    # Direct to the attribute of the sub model pack class (attribute not found in the main model pack class)
     def __getattr__(self, name):
         return self.instance.__getattribute__(name)
     
